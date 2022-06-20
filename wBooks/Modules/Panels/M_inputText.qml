@@ -31,6 +31,7 @@ Rectangle{
     Layout.fillWidth: true
     Layout.preferredHeight: 45 * ratio
     Layout.rightMargin: 10 * ratio
+    Layout.leftMargin: 10 * ratio
 //    border.width: 2
     border.color: (setting.lightMode) ? "transparent" : "#f7f7f7"
     radius: 10

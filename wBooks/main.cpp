@@ -3,7 +3,7 @@
 #include <QQmlContext>
 
 #include <widget.h>
-
+#include <DownloaderHeader/downloadcontroller.h>
 
 int main(int argc, char *argv[])
 {
@@ -21,6 +21,9 @@ int main(int argc, char *argv[])
     QCoreApplication::setOrganizationName("wBooks");
     QCoreApplication::setOrganizationDomain("");
     QCoreApplication::setApplicationName("wBooks");
+
+    downloadcontroller downloader;
+    engine.rootContext()->setContextProperty("downloader", &downloader);
 
     auto offlineStoragePath = engine.offlineStoragePath();
     engine.rootContext()->setContextProperty("offlineStoragePath", offlineStoragePath);

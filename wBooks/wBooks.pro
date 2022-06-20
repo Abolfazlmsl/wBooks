@@ -21,6 +21,7 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
 
 SOURCES += \
+        $$files(DownloaderSource/*.cpp)\
         epubcontainer.cpp \
         epubdocument.cpp \
         main.cpp \
@@ -29,6 +30,7 @@ SOURCES += \
         widget.cpp
 
 HEADERS += \
+    $$files(DownloaderHeader/*.h)\
     epubcontainer.h \
     epubdocument.h \
     tree_item.h \

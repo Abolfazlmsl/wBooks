@@ -19,5 +19,7 @@
         <file>Modules/Panels/TreeView.qml</file>
         <file>Modules/Panels/TreeViewItem.qml</file>
         <file>Modules/LocalDatabase/LocalDatabase.qml</file>
+        <file>Modules/Panels/DownloadPanel.qml</file>
+        <file>Images/logo1.png</file>
     </qresource>
 </RCC>

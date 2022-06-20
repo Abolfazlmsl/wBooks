@@ -36,8 +36,10 @@ Window {
     }
 
     //-- save app setting --//
-    property var mainSetting: Settings{
+    Settings{
         id: setting
+
+        fileName: "setting"
 
         //app properties
         property string cPath: ""
@@ -119,7 +121,28 @@ Window {
                     }
                 }
 
-                Item{Layout.preferredWidth: 20}
+                Label{
+                    id: downloadButton
+                    Layout.fillHeight: true
+                    Layout.preferredWidth: parent.width * 0.05 / 2
+                    text: Icons.download
+                    font.family: webfont.name
+                    font.pixelSize: Qt.application.font.pixelSize * 3
+
+                    verticalAlignment: Qt.AlignVCenter
+                    horizontalAlignment: Qt.AlignHCenter
+
+                    color: (setting.lightMode) ? "black":"white"
+                    MouseArea{
+                        anchors.fill: parent
+                        cursorShape: Qt.PointingHandCursor
+                        onClicked: {
+                            downloadpanel.visible = true
+                        }
+                    }
+                }
+
+                Item{Layout.preferredWidth: 5}
 
                 Rectangle{
                     Layout.preferredHeight: width
@@ -155,7 +178,7 @@ Window {
                     }
                 }
 
-                Item{Layout.preferredWidth: 50}
+                Item{Layout.preferredWidth: 10}
 
 
                 M_inputText{
@@ -456,6 +479,11 @@ Window {
         onRejected: {
             console.log("Canceled")
         }
+    }
+
+    DownloadPanel{
+        id: downloadpanel
+        visible: false
     }
 
     Component.onCompleted: {
