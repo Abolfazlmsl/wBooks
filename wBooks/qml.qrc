@@ -1,0 +1,23 @@
+<RCC>
+    <qresource prefix="/">
+        <file>main.qml</file>
+        <file>Modules/Panels/FilePanel.qml</file>
+        <file>Modules/Panels/M_inputText.qml</file>
+        <file>Fonts/Fonts.js</file>
+        <file>Fonts/Icon.js</file>
+        <file>Fonts/IRANSans_Medium.ttf</file>
+        <file>Fonts/IRANSansMobile(FaNum).ttf</file>
+        <file>Fonts/IRANSansMobile.ttf</file>
+        <file>Fonts/IRANSansMobile_Bold.ttf</file>
+        <file>Fonts/IRYekan.ttf</file>
+        <file>Fonts/materialdesignicons-webfont.ttf</file>
+        <file>Fonts/OpenSans-Regular.ttf</file>
+        <file>Fonts/segoeui.ttf</file>
+        <file>Fonts/segoeuib.ttf</file>
+        <file>Fonts/segoeuil.ttf</file>
+        <file>Fonts/Yekan.ttf</file>
+        <file>Modules/Panels/TreeView.qml</file>
+        <file>Modules/Panels/TreeViewItem.qml</file>
+        <file>Modules/LocalDatabase/LocalDatabase.qml</file>
+    </qresource>
+</RCC>
