@@ -20,10 +20,14 @@ public:
 signals:
   void addLine(QString qsLine);
   void downloadComplete();
+  void totalSize(int totalValue);
+  void received(int receivedValue);
   void progress(int nPercentage);
+  void errorHappend();
+  void filename(QString name);
 
 public slots:
-  void download(QUrl url);
+  void download(QUrl url, QString path);
   void pause();
   void resume();
 

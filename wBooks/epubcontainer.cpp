@@ -11,6 +11,7 @@
 #include <QImage>
 #include <QImageReader>
 
+
 #define METADATA_FOLDER "META-INF"
 #define MIMETYPE_FILE "mimetype"
 #define CONTAINER_FILE "META-INF/container.xml"

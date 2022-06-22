@@ -227,9 +227,11 @@ Window {
                         ListElement { text: "Courier"}
                     }
                     onActivated: {
-                        setting.font = fontButton.currentText
-                        setting.fontCurrentIndex = fontButton.currentIndex
-                        epub.setFont(fontButton.currentText, fontSizeButton.value)
+                        if (setting.font !== fontButton.currentText){
+                            setting.font = fontButton.currentText
+                            setting.fontCurrentIndex = fontButton.currentIndex
+                            epub.setFont(fontButton.currentText, fontSizeButton.value)
+                        }
                     }
                 }
 

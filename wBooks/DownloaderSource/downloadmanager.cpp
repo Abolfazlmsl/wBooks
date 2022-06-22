@@ -23,12 +23,11 @@ DownloadManager::~DownloadManager()
     }
 }
 
-void DownloadManager::download(QUrl url)
+void DownloadManager::download(QUrl url, QString path)
 {
     qDebug() << "download: URL=" << url.toString();
 
     _URL = url;
-    _qsFileName = "test";
     _nDownloadSize = 0;
     _nDownloadSizeAtPause = 0;
 
@@ -36,13 +35,16 @@ void DownloadManager::download(QUrl url)
     _CurrentRequest = QNetworkRequest(url);
 
     _pCurrentReply = _pManager->head(_CurrentRequest);
+    QString name = _pCurrentReply->request().url().fileName();
+    _qsFileName = path + name;
+    emit filename(_qsFileName);
 
     _Timer.setInterval(5000);
     _Timer.setSingleShot(true);
     connect(&_Timer, &QTimer::timeout, this, &DownloadManager::timeout);
     _Timer.start();
 
-    connect(_pCurrentReply, &QNetworkReply::finished, this, &DownloadManager::finished);
+    connect(_pCurrentReply, &QNetworkReply::finished, this, &DownloadManager::finishedHead);
     connect(_pCurrentReply, SIGNAL(error(QNetworkReply::NetworkError)), this, SLOT(error(QNetworkReply::NetworkError)));
 }
 
@@ -76,7 +78,6 @@ void DownloadManager::resume()
 
 void DownloadManager::download()
 {
-    qDebug() << "download()";
 
     if (_bAcceptRanges)
     {
@@ -89,6 +90,8 @@ void DownloadManager::download()
     }
 
     _pCurrentReply = _pManager->get(_CurrentRequest);
+   emit totalSize(_nDownloadTotal);
+
 
     _Timer.setInterval(5000);
     _Timer.setSingleShot(true);
@@ -106,11 +109,12 @@ void DownloadManager::finishedHead()
     _bAcceptRanges = false;
 
     QList<QByteArray> list = _pCurrentReply->rawHeaderList();
-    foreach (QByteArray header, list)
-    {
-        QString qsLine = QString(header) + " = " + _pCurrentReply->rawHeader(header);
-        addLine(qsLine);
-    }
+
+//    foreach (QByteArray header, list)
+//    {
+//        QString qsLine = QString(header) + " = " + _pCurrentReply->rawHeader(header);
+//        addLine(qsLine);
+//    }
 
     if (_pCurrentReply->hasRawHeader("Accept-Ranges"))
     {
@@ -145,18 +149,22 @@ void DownloadManager::finished()
     _pFile->rename(_qsFileName + ".part", _qsFileName);
     _pFile = NULL;
     _pCurrentReply = 0;
-    emit downloadComplete();
+    if (_nDownloadSize == _nDownloadTotal && _nDownloadSize != 0){
+        emit downloadComplete();
+    }
 }
 
 void DownloadManager::downloadProgress(qint64 bytesReceived, qint64 bytesTotal)
 {
     _Timer.stop();
     _nDownloadSize = _nDownloadSizeAtPause + bytesReceived;
-    qDebug() << "Download Progress: Received=" << _nDownloadSize << ": Total=" << _nDownloadSizeAtPause + bytesTotal;
+//    qDebug() << "Download Progress: Received=" << _nDownloadSize << ": Total=" << _nDownloadSizeAtPause + bytesTotal;
 
     _pFile->write(_pCurrentReply->readAll());
     int nPercentage = static_cast<int>((static_cast<float>(_nDownloadSizeAtPause + bytesReceived) * 100.0) / static_cast<float>(_nDownloadSizeAtPause + bytesTotal));
-    qDebug() << nPercentage;
+//    qDebug() << nPercentage;
+
+    emit received(_nDownloadSize);
     emit progress(nPercentage);
 
     _Timer.start(5000);
@@ -164,6 +172,7 @@ void DownloadManager::downloadProgress(qint64 bytesReceived, qint64 bytesTotal)
 
 void DownloadManager::error(QNetworkReply::NetworkError code)
 {
+    emit errorHappend();
     qDebug() << __FUNCTION__ << "(" << code << ")";
 }
 

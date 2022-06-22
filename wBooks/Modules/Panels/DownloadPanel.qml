@@ -10,6 +10,37 @@ import "./../../Fonts/Icon.js" as Icons
 ApplicationWindow{
     id: root_auth
 
+    property bool success: true
+
+    //-- Get the percentage of download from Qt --//
+    Connections {
+        target: downloader
+
+        function onSendTotalSize(size){
+            total_txt.text = size
+        }
+
+        function onReceivedData(data){
+            progress_txt.text = data
+        }
+
+        function onPercentage(value){
+            progressbar.value = value
+        }
+
+        function onSendFinish(){
+            success = true
+            popup.state = "downloaded"
+            alarmSignupWin.msg = "دانلود با موفقیت به اتمام رسید"
+        }
+
+        function onSendError(){
+            success = false
+            popup.state = "initial"
+            alarmSignupWin.msg = "دانلود با خطا مواجه شد"
+        }
+    }
+
     //-- when open LoginPage inputs most be Empty --//
     signal resetForm()
     onResetForm: {
@@ -53,6 +84,111 @@ ApplicationWindow{
     Pane {
         id: popup
 
+        state: "initial"
+
+        states: [
+            State {
+                name: "initial"
+                PropertyChanges {
+                    target: open_btn
+                    enabled: false
+                    color: "gray"
+                }
+                PropertyChanges {
+                    target: start_btn
+                    enabled: true
+                }
+                PropertyChanges {
+                    target: pause_btn
+                    enabled: false
+                }
+                PropertyChanges {
+                    target: resume_btn
+                    enabled: false
+                }
+            },
+            State {
+                name: "download"
+                PropertyChanges {
+                    target: open_btn
+                    enabled: false
+                    color: "gray"
+                }
+                PropertyChanges {
+                    target: start_btn
+                    enabled: false
+                }
+                PropertyChanges {
+                    target: pause_btn
+                    enabled: true
+                }
+                PropertyChanges {
+                    target: resume_btn
+                    enabled: false
+                }
+            },
+            State {
+                name: "pause"
+                PropertyChanges {
+                    target: open_btn
+                    enabled: false
+                    color: "gray"
+                }
+                PropertyChanges {
+                    target: start_btn
+                    enabled: true
+                }
+                PropertyChanges {
+                    target: pause_btn
+                    enabled: false
+                }
+                PropertyChanges {
+                    target: resume_btn
+                    enabled: true
+                }
+            },
+            State {
+                name: "resume"
+                PropertyChanges {
+                    target: open_btn
+                    enabled: false
+                    color: "gray"
+                }
+                PropertyChanges {
+                    target: start_btn
+                    enabled: false
+                }
+                PropertyChanges {
+                    target: pause_btn
+                    enabled: true
+                }
+                PropertyChanges {
+                    target: resume_btn
+                    enabled: false
+                }
+            },
+            State {
+                name: "downloaded"
+                PropertyChanges {
+                    target: open_btn
+                    enabled: true
+                    color: "#50FF4B"
+                }
+                PropertyChanges {
+                    target: start_btn
+                    enabled: true
+                }
+                PropertyChanges {
+                    target: pause_btn
+                    enabled: false
+                }
+                PropertyChanges {
+                    target: resume_btn
+                    enabled: false
+                }
+            }
+        ]
+
         Rectangle{
             anchors.fill: parent; color: "white"
         }
@@ -89,24 +225,24 @@ ApplicationWindow{
 
                 ColumnLayout{
                     anchors.fill: parent
-                    //-- footer of left layout--//
-                    Rectangle {
-                        id: bar
-                        Layout.fillWidth: true
-                        Layout.preferredHeight: 50
+                    //                    //-- footer of left layout--//
+                    //                    Rectangle {
+                    //                        id: bar
+                    //                        Layout.fillWidth: true
+                    //                        Layout.preferredHeight: 50
 
-                        radius: 20
-                        Layout.leftMargin: 10
-                        Layout.rightMargin: 10
-                        color: (setting.lightMode) ? "#6c88b7":"black"
+                    //                        radius: 20
+                    //                        Layout.leftMargin: 10
+                    //                        Layout.rightMargin: 10
+                    //                        color: (setting.lightMode) ? "#6c88b7":"black"
 
-                        Label{
-                            text: "wBooks downloader"
-                            font.pixelSize: Qt.application.font.pixelSize * 1.3
-                            color: (setting.lightMode) ? "black":"white"
-                            anchors.centerIn: parent
-                        }
-                    }
+                    //                        Label{
+                    //                            text: "wBooks downloader"
+                    //                            font.pixelSize: Qt.application.font.pixelSize * 1.3
+                    //                            color: (setting.lightMode) ? "black":"white"
+                    //                            anchors.centerIn: parent
+                    //                        }
+                    //                    }
 
                     Rectangle{
                         id: licenseView
@@ -137,7 +273,7 @@ ApplicationWindow{
 
                             //-- url --//
                             M_inputText{
-                                id: input_License
+                                id: input_address
                                 label: "Download address"
                                 icon: Icons.web
                                 placeholder: "Download address"
@@ -164,11 +300,11 @@ ApplicationWindow{
                                 to: 100
                                 value: 0
                                 background: Rectangle {
-                                        implicitWidth: 200
-                                        implicitHeight: 6
-                                        color: "#e6e6e6"
-                                        radius: 10
-                                    }
+                                    implicitWidth: 200
+                                    implicitHeight: 6
+                                    color: "#e6e6e6"
+                                    radius: 10
+                                }
 
                                 contentItem: Item {
                                     implicitWidth: 200
@@ -196,7 +332,72 @@ ApplicationWindow{
 
 
                             //-- spacer --//
-                            Item{Layout.preferredHeight: 40 }
+                            Item{Layout.preferredHeight: 10 }
+
+                            Item{
+                                Layout.fillWidth: true
+                                Layout.preferredHeight: 40
+                                RowLayout{
+                                    anchors.fill: parent
+                                    Item{Layout.fillWidth: true}
+                                    Label{
+                                        id: progress_txt
+                                        visible: progressbar.visible
+                                        verticalAlignment: Qt.AlignVCenter
+                                        horizontalAlignment: Qt.AlignHCenter
+                                        color: (setting.lightMode) ? "black" : "white"
+                                        text: ""
+                                    }
+
+                                    Label{
+                                        visible: progressbar.visible
+                                        verticalAlignment: Qt.AlignVCenter
+                                        horizontalAlignment: Qt.AlignHCenter
+                                        color: (setting.lightMode) ? "black" : "white"
+                                        text: "/"
+                                    }
+
+                                    Label{
+                                        id: total_txt
+                                        visible: progressbar.visible
+                                        verticalAlignment: Qt.AlignVCenter
+                                        horizontalAlignment: Qt.AlignHCenter
+                                        color: (setting.lightMode) ? "black" : "white"
+                                        text: ""
+                                    }
+                                    Item{Layout.preferredWidth: parent.width * 0.5}
+                                    //-- Button open --//
+                                    Rectangle{
+                                        id: open_btn
+                                        Layout.fillHeight: true
+                                        Layout.preferredWidth: parent.width * 0.2
+                                        visible: progressbar.visible
+                                        radius: width / 2
+
+
+                                        Label{
+                                            anchors.centerIn: parent
+                                            text: "باز کردن فایل"
+                                            font.family: iranSans.name
+                                            font.pixelSize: Qt.application.font.pixelSize * 1.5
+                                            color: "#ffffff"
+                                        }
+
+                                        MouseArea{
+                                            anchors.fill: parent
+                                            cursorShape: Qt.PointingHandCursor
+                                            onClicked: {
+                                                downloader.openFile()
+                                            }
+                                        }
+                                    }
+
+                                    Item{Layout.fillWidth: true}
+                                }
+                            }
+
+                            //-- spacer --//
+                            Item{Layout.preferredHeight: 20 }
 
                             Item{
                                 Layout.fillWidth: true
@@ -208,8 +409,9 @@ ApplicationWindow{
                                     Item{Layout.fillWidth: true}
 
 
-                                    //-- Button continue --//
+                                    //-- Button resume --//
                                     Rectangle{
+                                        id: resume_btn
                                         Layout.fillHeight: true
                                         Layout.preferredWidth: parent.width * 0.3
 
@@ -230,7 +432,8 @@ ApplicationWindow{
                                             anchors.fill: parent
                                             cursorShape: Qt.PointingHandCursor
                                             onClicked: {
-
+                                                popup.state = "resume"
+                                                downloader.resumeBtn_clicked()
                                             }
                                         }
                                     }
@@ -238,6 +441,7 @@ ApplicationWindow{
 
                                     //-- Button pause --//
                                     Rectangle{
+                                        id: pause_btn
                                         Layout.fillHeight: true
                                         Layout.preferredWidth: parent.width * 0.3
 
@@ -258,12 +462,14 @@ ApplicationWindow{
                                             anchors.fill: parent
                                             cursorShape: Qt.PointingHandCursor
                                             onClicked: {
-
+                                                popup.state = "pause"
+                                                downloader.pauseBtn_clicked()
                                             }
                                         }
                                     }
                                     //-- Button download --//
                                     Rectangle{
+                                        id: start_btn
                                         Layout.fillHeight: true
                                         Layout.preferredWidth: parent.width * 0.3
 
@@ -284,8 +490,16 @@ ApplicationWindow{
                                             anchors.fill: parent
                                             cursorShape: Qt.PointingHandCursor
                                             onClicked: {
-                                                progressbar.visible = true
-                                                progressbar.implicitHeight = 30
+                                                if (input_address.inputText.text != ""){
+                                                    popup.state = "download"
+                                                    alarmSignupWin.msg = ""
+                                                    progressbar.visible = true
+                                                    progressbar.implicitHeight = 30
+                                                    downloader.downloadBtn_clicked(input_address.inputText.text, offlineStoragePath)
+                                                }else{
+                                                    success = false
+                                                    alarmSignupWin.msg = "آدرس دانلود را وارد کنید"
+                                                }
                                             }
                                         }
                                     }
@@ -295,14 +509,38 @@ ApplicationWindow{
                                 }
                             }
 
-                            //-- filler --//
                             Item{Layout.fillHeight: true}
+
+                            Item{
+                                id: purchaseForm
+                                Layout.fillWidth: true
+                                Layout.preferredHeight: 50
+                                //-- Alarm --//
+                                Rectangle{
+                                    id: alarmSignupWin
+
+                                    property string msg: ""
+
+                                    anchors.fill: parent
+
+                                    color: (msg === "") ? "transparent" : (success) ?  "green" : "#E91E63"
+
+                                    Label{
+                                        id: lblAlarm3
+                                        text: alarmSignupWin.msg
+                                        anchors.centerIn: parent
+                                        color: "white"
+
+                                    }
+                                }
+                            }
                         }
 
 
                     }
                 }
             }
+
         }
 
     }
