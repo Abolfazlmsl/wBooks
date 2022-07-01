@@ -8,12 +8,12 @@ Widget::Widget(QQuickItem *parent)
       m_currentChapter(0)
 {
     m_document = new EPubDocument(this);
-
     connect(m_document, &EPubDocument::loadCompleted, this, [&]() {
         update();
     });
 
     connect(m_document, &EPubDocument::loadContents, this, &Widget::setContents);
+
 }
 
 Widget::~Widget()
@@ -57,6 +57,8 @@ bool Widget::loadFile(const QString &path)
         qWarning() << path << "doesn't exist";
         return false;
     }
+
+
 
     m_path = path;
 
@@ -107,16 +109,15 @@ void Widget::paint(QPainter *painter)
     }
     painter->setRenderHint(QPainter::Antialiasing, true);
     if (!m_document->loaded()) {
-        if (lightMode){
-            painter->setPen(Qt::black);
-            painter->drawText(boundingRect(), Qt::AlignCenter, "Please choose an .epub file to open");
-        }else{
-            painter->setPen(Qt::white);
-            painter->drawText(boundingRect(), Qt::AlignCenter, "Please choose an .epub file to open");
-        }
+//        if (lightMode){
+//            painter->setPen(Qt::black);
+//            painter->drawText(boundingRect(), Qt::AlignCenter, "Please choose an .epub file to open");
+//        }else{
+//            painter->setPen(Qt::white);
+//            painter->drawText(boundingRect(), Qt::AlignCenter, "Please choose an .epub file to open");
+//        }
         return;
     }
-
     int page_number = qCeil(m_document->docSize().height()/m_document->pageSize().height());
     setPageNumber(page_number);
     setBlockNumber(m_document->blockCount());
@@ -125,8 +126,10 @@ void Widget::paint(QPainter *painter)
 
     QAbstractTextDocumentLayout::PaintContext paintContext;
 
-    paintContext.clip = boundingRect();
-    paintContext.clip.translate(0, m_yOffset);
+    QRectF rect = QRectF(0,0,m_document->pageSize().width(),m_document->pageSize().height());
+//    paintContext.clip = boundingRect();
+    paintContext.clip = rect;
+    paintContext.clip.translate(0,m_yOffset);
 
     for (int group = 0; group < 3; ++group) {
         if (lightMode){
@@ -152,6 +155,11 @@ void Widget::paint(QPainter *painter)
 
     painter->translate(0, -m_yOffset);
     painter->setClipRect(paintContext.clip);
+
+//    QTextCursor firstVisible = m_document->cursorForPosition(rect.topLeft());
+//    QTextCursor lastVisible = m_document->cursorForPosition(rect.bottomRight());
+
+//    m_document->drawContents(painter, rect);
 
     m_document->documentLayout()->draw(painter, paintContext);
     update();

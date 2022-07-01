@@ -44,6 +44,7 @@ public:
     virtual ~EPubDocument();
 
     bool loaded() { return m_loaded; }
+    void setLoaded(bool isLoad) { m_loaded = isLoad; }
 
     QSizeF docSize() {return m_docSize;}
 

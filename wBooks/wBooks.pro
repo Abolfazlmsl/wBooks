@@ -22,6 +22,7 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 
 SOURCES += \
         $$files(DownloaderSource/*.cpp)\
+        $$files(PdfHandlerSource/*.cpp)\
         epubcontainer.cpp \
         epubdocument.cpp \
         main.cpp \
@@ -31,8 +32,12 @@ SOURCES += \
 
 HEADERS += \
     $$files(DownloaderHeader/*.h)\
+    $$files(PdfHandlerHeader/*.h)\
     epubcontainer.h \
     epubdocument.h \
     tree_item.h \
     tree_model.h \
     widget.h
+
+#unix: LIBS += -lpoppler-qt5
+win32: LIBS += "G:/QtTest/wBooks/wbooks/build-wBooks-Desktop_Qt_5_15_2_MinGW_64_bit-Debug/debug/libpoppler-qt5-1.dll"

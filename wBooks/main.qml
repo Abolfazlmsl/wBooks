@@ -6,6 +6,7 @@ import Qt.labs.platform 1.1
 import Qt.labs.settings 1.1
 
 import com.EpubWidget 1.0
+import org.pdfviewer.poppler 1.0
 
 import "./Modules/Panels"
 import "./Modules/LocalDatabase"
@@ -51,6 +52,7 @@ Window {
         property real sliderValue: 1
         property int onepageHeight: 1
         property real stepSize: 1
+        property bool isEpubViewer: true
     }
 
 
@@ -270,82 +272,226 @@ Window {
                     }
                 }
 
+                Label{
+                    id: imagesButton
+                    Layout.fillHeight: true
+                    Layout.preferredWidth: parent.width * 0.05 / 2
+                    text: Icons.view_sequential
+                    font.family: webfont.name
+                    font.pixelSize: Qt.application.font.pixelSize * 3
+
+                    verticalAlignment: Qt.AlignVCenter
+                    horizontalAlignment: Qt.AlignHCenter
+
+                    color: (setting.lightMode) ? "black":"white"
+                    MouseArea{
+                        anchors.fill: parent
+                        cursorShape: Qt.PointingHandCursor
+                        onClicked: {
+                            mainRow.isImagesOpen = !mainRow.isImagesOpen
+                            if (mainRow.isImagesOpen){
+                                showImagesAnim.restart()
+                            }else{
+                                hideImagesAnim.restart()
+                            }
+                        }
+                    }
+                }
             }
 
             Row{
+                id: mainRow
                 Layout.fillWidth: true
-                Layout.preferredHeight: parent.height * 0.75
+                Layout.preferredHeight: parent.height * 0.7
                 Layout.leftMargin: 10
+                Layout.rightMargin: 10
                 clip: true
-                EpubWidget{
-                    id: epub
-                    clip: true
-                    width: parent.width * 0.95
+
+                ParallelAnimation {
+                    id: showImagesAnim
+                    NumberAnimation { target: mainStack; property: "width"; to: mainRow.width * 0.875; duration: 0 }
+                    NumberAnimation { target: pdfview; property: "width"; to: mainRow.width * 0.1; duration: 0 }
+                }
+
+                ParallelAnimation {
+                    id: hideImagesAnim
+                    NumberAnimation { target: mainStack; property: "width"; to: mainRow.width; duration: 0 }
+                    NumberAnimation { target: pdfview; property: "width"; to: 0; duration: 0 }
+                }
+
+                property bool isImagesOpen: false
+
+                StackLayout {
+                    id: mainStack
                     height: parent.height
+                    currentIndex: 0
+                    width: parent.width
 
-                    onWidthChanged: {
-                        epub.resizeEvent()
-                    }
+                    Rectangle {
+                        Layout.fillWidth: true
+                        Layout.fillHeight: true
+                        color: (setting.lightMode) ? "white":"black"
 
-                    onHeightChanged: {
-                        epub.resizeEvent()
-                    }
-
-                    onContentsChanged: {
-                        contentModel = contents
-                        epubslider.value = epubslider.stepSize
-                        thisPageNumber = 1
-                    }
-
-                    onSliderHeightChanged: {
-                        epubslider.stepSize = epubslider.to / sliderHeight
-                        setting.stepSize = epubslider.stepSize
-//                        epubslider.to = sliderHeight
-                        sliderTotalHeight = sliderHeight
-                    }
-
-                    onPageHeightChanged: {
-                        setting.onepageHeight = pageHeight
-                    }
-
-                    onPageNumberChanged: {
-                        pagesNumber = pageNumber
-                    }
-
-                    onBlockNumberChanged: {
-                        blocksNumber = blockNumber
-                    }
-
-                    MouseArea{
-                        id: epubArea
-                        anchors.fill: parent
-                        propagateComposedEvents: true
-                        onWheel: {
-                            //                            epub.scroll(-wheel.angleDelta.y)
-                            epubslider.value = epubslider.value-wheel.angleDelta.y*setting.stepSize
+                        Label{
+                            anchors.fill: parent
+                            horizontalAlignment: Qt.AlignHCenter
+                            verticalAlignment: Qt.AlignVCenter
+                            font.pixelSize: Qt.application.font.pixelSize * 3
+                            color: (setting.lightMode) ? "black":"white"
+                            text: "Books of the database will be shown in this section"
                         }
                     }
 
+                    Rectangle {
+                        Layout.fillWidth: true
+                        Layout.fillHeight: true
+                        color: "white"
+                        EpubWidget{
+                            id: epub
+                            clip: true
+                            anchors.fill: parent
+                            onWidthChanged: {
+                                epub.resizeEvent()
+                            }
+
+                            onHeightChanged: {
+                                epub.resizeEvent()
+                            }
+
+                            onContentsChanged: {
+                                contentModel = contents
+                                epubslider.value = epubslider.stepSize
+                                thisPageNumber = 1
+                            }
+
+                            onSliderHeightChanged: {
+                                epubslider.stepSize = epubslider.to / sliderHeight
+                                setting.stepSize = epubslider.stepSize
+        //                        epubslider.to = sliderHeight
+                                sliderTotalHeight = sliderHeight
+                            }
+
+                            onPageHeightChanged: {
+                                setting.onepageHeight = pageHeight
+                            }
+
+                            onPageNumberChanged: {
+                                pagesNumber = pageNumber
+                            }
+
+                            onBlockNumberChanged: {
+                                blocksNumber = blockNumber
+                            }
+
+                            MouseArea{
+                                id: epubArea
+                                anchors.fill: parent
+                                propagateComposedEvents: true
+                                onWheel: {
+                                    //                            epub.scroll(-wheel.angleDelta.y)
+                                    epubslider.value = epubslider.value-wheel.angleDelta.y*setting.stepSize
+                                }
+                            }
+
+                        }
+
+                    }
+
+                    Rectangle {
+                        Layout.fillWidth: true
+                        Layout.fillHeight: true
+                        color: "white"
+                        Flickable {
+                            id: pdf
+                            anchors.fill: parent
+                            contentWidth: bigImage.width
+                            contentHeight: bigImage.height
+                            boundsBehavior: Flickable.StopAtBounds
+                            Image{
+                                id: bigImage
+                                sourceSize.width: mainStack.width
+                                sourceSize.height: mainStack.height
+                                source: (poppler.loaded && pdfview.currentIndex >= 0)?  "image://poppler/page/"+(pdfview.currentIndex+1): ""
+                            }
+                            MouseArea{
+                                id: pdfArea
+                                anchors.fill: parent
+                                propagateComposedEvents: true
+                                onWheel: {
+                                    if (pdf.contentY - wheel.angleDelta.y > 0 && pdf.contentY - wheel.angleDelta.y<pdf.contentHeight){
+                                        pdf.contentY = pdf.contentY - wheel.angleDelta.y
+                                    }else if(pdf.contentY - wheel.angleDelta.y < 0 && pdfview.currentIndex>0){
+                                        pdfview.currentIndex = pdfview.currentIndex - 1
+                                        pdf.contentY = pdf.contentHeight
+                                    }else if(pdf.contentY - wheel.angleDelta.y>pdf.contentHeight){
+                                        pdfview.currentIndex = pdfview.currentIndex + 1
+                                    }
+                                }
+                            }
+                        }
+                    }
                 }
-                Slider{
-                    id: epubslider
-                    enabled: fileUploaded
-                    clip: true
-                    from: stepSize
-                    value: stepSize
-                    to: 100
-                    width: parent.width * 0.05
+
+                Item{
+                    width: parent.width * 0.025
                     height: parent.height
-                    orientation: Qt.Vertical
-                    rotation: 180
-                    onValueChanged: {
+                }
+
+                ListView{
+                    id: pdfview
+                    height: parent.height
+                    width: 0
+                    model: poppler.numPages
+                    spacing: 25
+
+                    delegate: Column{
+                        id: image
+                        Image{
+                            width: pdfview.width
+                            source: poppler.loaded? "image://poppler/page/" + (modelData+1): ""
+                            sourceSize.width: width
+                            MouseArea{
+                                anchors.fill: parent
+                                onClicked: {
+                                    image.ListView.view.currentIndex = index
+                                    image.ListView.view.focus = true
+                                }
+                            }
+                        }
+                        Label{
+                            width: pdfview.width
+                            visible: mainRow.isImagesOpen
+                            color: (setting.lightMode) ? "black":"white"
+                            text: index+1
+                            horizontalAlignment: Qt.AlignHCenter
+                        }
+                    }
+                }
+
+
+            }
+
+            Slider{
+                id: epubslider
+                enabled: fileUploaded
+                clip: true
+                from: stepSize
+                value: stepSize
+                to: 100
+                Layout.fillWidth: true
+                Layout.preferredHeight: parent.height * 0.05
+
+                onValueChanged: {
+                    if (setting.isEpubViewer){
                         setting.sliderValue = value
                         epub.scrollSlider(value/setting.stepSize)
                         thisPageNumber = Math.ceil(value / setting.onepageHeight/setting.stepSize)
                         update()
+                    }else{
+//                        pdf.contentY = (1.0 - epubslider.position) * (pdf.contentHeight - pdf.height)
+//                        setting.sliderValue = (1.0 - epubslider.position) * (pdf.contentHeight - pdf.height)
                     }
                 }
-
             }
 
             Item{
@@ -458,24 +604,51 @@ Window {
     }
 
 
+    Poppler{
+        id: poppler
+    }
+
     //-- Folder dialog --//
     FileDialog {
         id: fileDialog
         visible: false
         title: "Please choose a file"
+        selectedNameFilter.index: 0
         nameFilters: ["Epub files (*.epub)", "Pdf files (*.pdf)"]
 
         onAccepted: {
-            var path = fileDialog.file.toString()
-            path = path.replace(/^(file:\/{3})/,"")
-            var fileName = path.slice(path.lastIndexOf("/")+1)
-            browseText.text = fileName
-            var result = epub.loadFile(path)
-            if (result){
+            if (fileDialog.selectedNameFilter.name === "Epub files"){
+                setting.isEpubViewer = true
+                var path = fileDialog.file.toString()
+                path = path.replace(/^(file:\/{3})/,"")
+                var fileName = path.slice(path.lastIndexOf("/")+1)
+                browseText.text = fileName
+                var result = epub.loadFile(path)
+                if (result){
+                    fileUploaded = true
+                    var cPath = epub.copyBooktoDb(offlineStoragePath, fileName)
+                    setting.cPath = cPath
+                    setting.openFileName = fileName
+                    mainStack.currentIndex = 1
+                }
+            }else{
+                setting.isEpubViewer = false
+                path = fileDialog.file.toString()
+                path = path.replace(/^(file:\/{3})/,"")
+                fileName = path.slice(path.lastIndexOf("/")+1)
+                browseText.text = fileName
+                poppler.path = urlToPath(""+fileDialog.file.toString())
+                thisPageNumber = 1
+                epubslider.stepSize = epubslider.to / pdf.height
+                setting.stepSize = epubslider.stepSize
+//                sliderTotalHeight = sliderHeight
+
+                setting.onepageHeight = pdf.height
+
+                pagesNumber = poppler.numPages
+
                 fileUploaded = true
-                var cPath = epub.copyBooktoDb(offlineStoragePath, fileName)
-                setting.cPath = cPath
-                setting.openFileName = fileName
+                mainStack.currentIndex = 2
             }
         }
         onRejected: {
@@ -486,6 +659,17 @@ Window {
     DownloadPanel{
         id: downloadpanel
         visible: false
+    }
+
+    function urlToPath(urlString) {
+        var s
+        if (urlString.startsWith("file:///")) {
+            var k = urlString.charAt(9) === ':' ? 8 : 7
+            s = urlString.substring(k)
+        } else {
+            s = urlString
+        }
+        return decodeURIComponent(s);
     }
 
     Component.onCompleted: {

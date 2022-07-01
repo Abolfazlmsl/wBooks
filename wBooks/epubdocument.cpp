@@ -213,7 +213,6 @@ void EPubDocument::loadDocument()
     setBaseUrl(QUrl(m_currentItem.path));
     qDebug() << "Base url:" << baseUrl();
 
-    emit loadCompleted();
     qDebug() << "Load done in" << timer.restart() << "ms";
     {
         QElapsedTimer timer;

@@ -4,6 +4,7 @@
 
 #include <widget.h>
 #include <DownloaderHeader/downloadcontroller.h>
+#include <PdfHandlerHeader/pdfModel.h>
 
 int main(int argc, char *argv[])
 {
@@ -16,6 +17,7 @@ int main(int argc, char *argv[])
 
     QQmlApplicationEngine engine;
     qmlRegisterType<Widget>("com.EpubWidget", 1, 0, "EpubWidget");
+    qmlRegisterType<PdfModel>("org.pdfviewer.poppler", 1, 0, "Poppler");
 
     //-- QSetting configuration --//
     QCoreApplication::setOrganizationName("wBooks");
