@@ -360,13 +360,15 @@ Window {
 
                             onContentsChanged: {
                                 contentModel = contents
-                                epubslider.value = epubslider.stepSize
+                                epubslider.from = 1
+                                epubslider.value = 1
+                                epubslider.stepSize = 1
+                                setting.stepSize = epubslider.stepSize
                                 thisPageNumber = 1
                             }
 
                             onSliderHeightChanged: {
-                                epubslider.stepSize = epubslider.to / sliderHeight
-                                setting.stepSize = epubslider.stepSize
+
         //                        epubslider.to = sliderHeight
                                 sliderTotalHeight = sliderHeight
                             }
@@ -376,6 +378,7 @@ Window {
                             }
 
                             onPageNumberChanged: {
+                                epubslider.to = pageNumber
                                 pagesNumber = pageNumber
                             }
 
@@ -480,21 +483,82 @@ Window {
 
             }
 
+
+            RowLayout{
+                id: changepage
+                Layout.fillWidth: true
+                Layout.preferredHeight: parent.height * 0.025
+                Layout.margins: 5
+                spacing: 30
+                Item{Layout.fillWidth: true}
+
+                Item{
+                    Layout.preferredWidth: 20
+                    Layout.fillHeight: true
+                    Label{
+                        id: nextPage
+                        anchors.fill: parent
+                        text: Icons.chevron_left
+                        font.family: webfont.name
+                        font.pixelSize: Qt.application.font.pixelSize * 3
+
+                        verticalAlignment: Qt.AlignVCenter
+                        horizontalAlignment: Qt.AlignHCenter
+
+                        color: (setting.lightMode) ?"black":"white"
+                        MouseArea{
+                            anchors.fill: parent
+                            cursorShape: Qt.PointingHandCursor
+                            onClicked: {
+                                epub.nextPage()
+                            }
+                        }
+                    }
+                }
+
+                Item{
+                    Layout.preferredWidth: 20
+                    Layout.fillHeight: true
+                    Label{
+                        id: previousPage
+                        anchors.fill: parent
+                        text: Icons.chevron_right
+                        font.family: webfont.name
+                        font.pixelSize: Qt.application.font.pixelSize * 3
+
+                        verticalAlignment: Qt.AlignVCenter
+                        horizontalAlignment: Qt.AlignHCenter
+
+                        color: (setting.lightMode) ?"black":"white"
+                        MouseArea{
+                            anchors.fill: parent
+                            cursorShape: Qt.PointingHandCursor
+                            onClicked: {
+                                epub.previousPage()
+                            }
+                        }
+                    }
+                }
+
+                Item{Layout.fillWidth: true}
+            }
+
             Slider{
                 id: epubslider
                 enabled: fileUploaded
                 clip: true
                 from: stepSize
                 value: stepSize
-                to: 100
                 Layout.fillWidth: true
                 Layout.preferredHeight: parent.height * 0.05
 
                 onValueChanged: {
                     if (setting.isEpubViewer){
                         setting.sliderValue = value
-                        epub.scrollSlider(value/setting.stepSize)
-                        thisPageNumber = Math.ceil(value / setting.onepageHeight/setting.stepSize)
+//                        epub.scrollSlider(value/setting.stepSize)
+                        epub.specificPage(value)
+//                        thisPageNumber = Math.ceil(value / setting.onepageHeight/setting.stepSize)
+                        thisPageNumber = value
                         update()
                     }else{
                         setting.sliderValue = value
@@ -564,7 +628,7 @@ Window {
             RowLayout{
                 id: browesLay
                 Layout.fillWidth: true
-                Layout.preferredHeight: parent.height * 0.1
+                Layout.preferredHeight: parent.height * 0.075
                 Layout.margins: 5
                 spacing: 10
                 TextField{

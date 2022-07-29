@@ -84,6 +84,9 @@ public slots:
     int findBlockNumber(int index);
     void setSetting(QString font, int fontSize, bool mode);
     QString copyBooktoDb(QString path, QString fileName);
+    void previousPage();
+    void nextPage();
+    void specificPage(int index);
 
 protected:
     void paint(QPainter *painter) override;
@@ -108,7 +111,7 @@ private:
     QString m_font;
     int m_fontSize;
     QRectF rect;
-    int addHeight;
+    int currentPage = 1;
 
 signals:
     void contentsChanged(TreeModel *model);

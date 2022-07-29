@@ -51,8 +51,10 @@ public:
     int docPage() {return m_page;}
 
     void openDocument(const QString &path);
+    int itemSpacing = 10;
 
     void readContents();
+    void updateDocument(int page);
 
     void clearCache() {m_renderedSvgs.clear();}
 
@@ -87,6 +89,7 @@ private:
     int m_newpage;
     bool m_loaded;
     QStringList items;
+    QString cover;
 
     TreeModel *tModel_content = new TreeModel();
 };

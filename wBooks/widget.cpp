@@ -28,8 +28,8 @@ void Widget::setFont(QString font, int fontSize)
     m_fontSize = fontSize;
     QFont serifFont(m_font, m_fontSize);
     m_document->setDefaultFont(serifFont);
-//    update();
-    emit m_document->documentLayout()->update(rect);
+    update();
+//    emit m_document->documentLayout()->update(rect);
 }
 
 void Widget::changeTheme(bool isLight)
@@ -94,9 +94,9 @@ void Widget::scrollSlider(int amount)
 
 void Widget::scrollPage(int amount)
 {
-    int currentPage = m_yOffset / (addHeight);
+    int currentPage = m_yOffset / (m_document->size().height());
     currentPage += amount;
-    int offset = currentPage * (addHeight);
+    int offset = currentPage * (m_document->size().height());
     //    offset = qMin(int(m_document->size().height() - m_document->pageSize().height()), offset);
     m_yOffset = qMax(0, offset);
     update();
@@ -124,16 +124,15 @@ void Widget::paint(QPainter *painter)
 
     int page_number = m_document->docPage();
     int page_new_number = m_document->docNewPage();
-    addHeight = qFloor(page_new_number*m_document->pageSize().height())/page_number;
     setPageNumber(page_number);
     setBlockNumber(m_document->blockCount());
-    setSliderHeight(page_number * addHeight);
-    setPageHeight(addHeight);
+    setSliderHeight(page_new_number * m_document->pageSize().height());
+    setPageHeight(m_document->pageSize().height());
 
     QAbstractTextDocumentLayout::PaintContext paintContext;
 
 //    QRectF rect = QRectF(0,m_yOffset,m_document->pageSize().width(),m_yOffset+m_document->pageSize().height());
-    rect = QRectF(0,0,m_document->pageSize().width(),addHeight);
+    rect = QRectF(0,0,m_document->pageSize().width(),m_document->pageSize().height());
 //    paintContext.clip = boundingRect();
     paintContext.clip = rect;
     paintContext.clip.translate(0,m_yOffset);
@@ -210,8 +209,8 @@ void Widget::resizeEvent()
 {
     m_document->clearCache();
     m_document->setPageSize(size());
-//    update();
-    emit m_document->documentLayout()->update(rect);
+    update();
+//    emit m_document->documentLayout()->update(rect);
 }
 
 int Widget::findBlockNumber(int index)
@@ -244,4 +243,24 @@ QString Widget::copyBooktoDb(QString path, QString fileName)
         return cPath;
     }
     return "";
+}
+
+void Widget::previousPage()
+{
+    if (currentPage > 1){
+        currentPage--;
+        m_document->updateDocument(currentPage);
+    }
+}
+
+void Widget::nextPage()
+{
+    currentPage++;
+    m_document->updateDocument(currentPage);
+}
+
+void Widget::specificPage(int index)
+{
+    currentPage = index;
+    m_document->updateDocument(currentPage);
 }

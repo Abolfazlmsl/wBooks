@@ -13,7 +13,6 @@ EPubDocument::EPubDocument(QObject *parent) : QTextDocument(parent),
 //    });
 
     connect(documentLayout(), &QAbstractTextDocumentLayout::pageCountChanged, this, [=](const int &newPage) {
-        if (!m_loaded) {m_page = newPage;}
         m_newpage = newPage;
         m_loaded = true;
         emit loadCompleted();
@@ -182,14 +181,17 @@ void EPubDocument::loadDocument()
     if (!m_container->openFile(m_documentPath)) {
         return;
     }
-    qDebug() << "Opened in" << timer.restart() << "ms";
+
+    qDebug() << "Time restarted in " << timer.restart() << "ms";
 
     items = m_container->getItems();
 
-    QString cover = m_container->getStandardPage(EpubPageReference::CoverPage);
+    cover = m_container->getStandardPage(EpubPageReference::CoverPage);
     if (!cover.isEmpty()) {
         items.prepend(cover);
     }
+
+    m_page = qCeil(items.length() / 10);
 
     QDomDocument domDoc;
     QTextCursor textCursor(this);
@@ -198,11 +200,11 @@ void EPubDocument::loadDocument()
 
     QTextBlockFormat pageBreak;
     pageBreak.setPageBreakPolicy(QTextFormat::PageBreak_AlwaysBefore);
-//    pageBreak.setLineHeight(0, 4);
-    //for (const QString &chapter : items) {
+
     int num = 0;
-    while(!items.isEmpty()) {
-        const QString &chapter = items.takeFirst();
+    for (int i=0; i<itemSpacing;i++){
+        if (i>=items.length()){break;}
+        const QString &chapter = items[i];
         m_currentItem = m_container->getEpubItem(chapter);
         if (m_currentItem.path.isEmpty()) {
             continue;
@@ -254,9 +256,46 @@ void EPubDocument::loadDocument()
 
     textCursor.endEditBlock();
     readContents();
+}
 
-//    emit loadCompleted();
+void EPubDocument::updateDocument(int page)
+{
+    this->clear();
+    QDomDocument domDoc;
+    QTextCursor textCursor(this);
+    setBaseUrl(QUrl());
+    textCursor.beginEditBlock();
+    textCursor.movePosition(QTextCursor::End);
 
+    QTextBlockFormat pageBreak;
+    pageBreak.setPageBreakPolicy(QTextFormat::PageBreak_AlwaysBefore);
+
+    int num = (page-1);
+    for (int i=(page-1)*itemSpacing; i<page*itemSpacing;i++){
+        if (i>=items.length()){break;}
+        const QString &chapter = items[i];
+        m_currentItem = m_container->getEpubItem(chapter);
+        if (m_currentItem.path.isEmpty()) {
+            continue;
+        }
+
+        QSharedPointer<QIODevice> ioDevice = m_container->getIoDevice(m_currentItem.path);
+
+        domDoc.setContent(ioDevice.data());
+
+        if (!cover.isEmpty() && num==0){
+            fixImages(domDoc);
+        }
+        textCursor.insertFragment(QTextDocumentFragment::fromHtml(domDoc.toString()));
+        textCursor.insertBlock(pageBreak);
+        num++;
+    }
+
+    setBaseUrl(QUrl(m_currentItem.path));
+//    qDebug() << "Base url:" << baseUrl();
+    textCursor.endEditBlock();
+
+    emit loadCompleted();
 }
 
 void EPubDocument::fixImages(QDomDocument &newDocument)
