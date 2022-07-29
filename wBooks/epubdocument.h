@@ -47,6 +47,8 @@ public:
     void setLoaded(bool isLoad) { m_loaded = isLoad; }
 
     QSizeF docSize() {return m_docSize;}
+    int docNewPage() {return m_newpage;}
+    int docPage() {return m_page;}
 
     void openDocument(const QString &path);
 
@@ -81,6 +83,8 @@ private:
     QList<int> m_loadedFonts;
 
     QSizeF m_docSize;
+    int m_page;
+    int m_newpage;
     bool m_loaded;
 
     TreeModel *tModel_content = new TreeModel();

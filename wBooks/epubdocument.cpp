@@ -4,11 +4,20 @@ EPubDocument::EPubDocument(QObject *parent) : QTextDocument(parent),
     m_container(nullptr),
     m_loaded(false)
 {
-    setUndoRedoEnabled(false);
-    connect(documentLayout(), &QAbstractTextDocumentLayout::documentSizeChanged, this, [=](const QSizeF &newSize) {
-            qDebug() << "doc size changed" << newSize;
-            m_docSize = newSize;
-            });
+    setUndoRedoEnabled(true);
+//    connect(documentLayout(), &QAbstractTextDocumentLayout::documentSizeChanged, this, [=](const QSizeF &newSize) {
+//        qDebug() << "doc size changed";
+//        qDebug() << "doc size changed" << newSize;
+//        qDebug() << "----------------------------";
+//        m_docSize = newSize;
+//    });
+
+    connect(documentLayout(), &QAbstractTextDocumentLayout::pageCountChanged, this, [=](const int &newPage) {
+        if (!m_loaded) {m_page = newPage;}
+        m_newpage = newPage;
+        m_loaded = true;
+        emit loadCompleted();
+    });
 
 }
 
@@ -189,6 +198,7 @@ void EPubDocument::loadDocument()
 
     QTextBlockFormat pageBreak;
     pageBreak.setPageBreakPolicy(QTextFormat::PageBreak_AlwaysBefore);
+//    pageBreak.setLineHeight(0, 4);
     //for (const QString &chapter : items) {
     int num = 0;
     while(!items.isEmpty()) {
@@ -245,7 +255,6 @@ void EPubDocument::loadDocument()
     textCursor.endEditBlock();
     readContents();
 
-    m_loaded = true;
 //    emit loadCompleted();
 
 }

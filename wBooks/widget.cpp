@@ -2,6 +2,7 @@
 
 #include "epubdocument.h"
 #include <QScrollArea>
+#include <QPrinter>
 
 Widget::Widget(QQuickItem *parent)
     : QQuickPaintedItem(parent),
@@ -23,9 +24,12 @@ Widget::~Widget()
 
 void Widget::setFont(QString font, int fontSize)
 {
-    QFont serifFont(font, fontSize);
+    m_font = font;
+    m_fontSize = fontSize;
+    QFont serifFont(m_font, m_fontSize);
     m_document->setDefaultFont(serifFont);
-    update();
+//    update();
+    m_document->documentLayout()->update(rect);
 }
 
 void Widget::changeTheme(bool isLight)
@@ -58,15 +62,14 @@ bool Widget::loadFile(const QString &path)
         return false;
     }
 
-
-
     m_path = path;
 
-    QFont serifFont(m_font, m_fontSize);
+    m_document->setLoaded(false);
     m_document->clear();
     m_document->clearCache();
     m_document->openDocument(path);
     m_document->setPageSize(size());
+    QFont serifFont(m_font, m_fontSize);
     m_document->setDefaultFont(serifFont);
 
     return true;
@@ -91,9 +94,9 @@ void Widget::scrollSlider(int amount)
 
 void Widget::scrollPage(int amount)
 {
-    int currentPage = m_yOffset / m_document->pageSize().height();
+    int currentPage = m_yOffset / (addHeight);
     currentPage += amount;
-    int offset = currentPage * m_document->pageSize().height();
+    int offset = currentPage * (addHeight);
     //    offset = qMin(int(m_document->size().height() - m_document->pageSize().height()), offset);
     m_yOffset = qMax(0, offset);
     update();
@@ -101,7 +104,6 @@ void Widget::scrollPage(int amount)
 
 void Widget::paint(QPainter *painter)
 {
-
     if (lightMode){
         painter->fillRect(boundingRect(), Qt::white);
     }else{
@@ -118,15 +120,20 @@ void Widget::paint(QPainter *painter)
 //        }
         return;
     }
-    int page_number = qCeil(m_document->docSize().height()/m_document->pageSize().height());
+//    int page_number = qCeil(m_document->docSize().height()/m_document->pageSize().height());
+
+    int page_number = m_document->docPage();
+    int page_new_number = m_document->docNewPage();
+    addHeight = qFloor(page_new_number*m_document->pageSize().height())/page_number;
     setPageNumber(page_number);
     setBlockNumber(m_document->blockCount());
-    setSliderHeight(m_document->docSize().height());
-    setPageHeight(m_document->pageSize().height());
+    setSliderHeight(page_number * addHeight);
+    setPageHeight(addHeight);
 
     QAbstractTextDocumentLayout::PaintContext paintContext;
 
-    QRectF rect = QRectF(0,0,m_document->pageSize().width(),m_document->pageSize().height());
+//    QRectF rect = QRectF(0,m_yOffset,m_document->pageSize().width(),m_yOffset+m_document->pageSize().height());
+    rect = QRectF(0,0,m_document->pageSize().width(),addHeight);
 //    paintContext.clip = boundingRect();
     paintContext.clip = rect;
     paintContext.clip.translate(0,m_yOffset);
@@ -162,8 +169,16 @@ void Widget::paint(QPainter *painter)
 //    m_document->drawContents(painter, rect);
 
     m_document->documentLayout()->draw(painter, paintContext);
-    update();
 
+
+//    QPrinter MyPrinter(QPrinter::HighResolution);
+//    MyPrinter.setOutputFormat(QPrinter::PdfFormat);
+//    MyPrinter.setOutputFileName("test.pdf");
+//    MyPrinter.setPageSize(QPrinter::Letter);
+//    MyPrinter.setColorMode(QPrinter::Color);
+//    MyPrinter.setOrientation(QPrinter::Landscape);
+
+//    m_document->print(&MyPrinter);
 }
 
 //void Widget::keyPressEvent(QKeyEvent *event)
@@ -195,7 +210,8 @@ void Widget::resizeEvent()
 {
     m_document->clearCache();
     m_document->setPageSize(size());
-    update();
+//    update();
+    m_document->documentLayout()->update(rect);
 }
 
 int Widget::findBlockNumber(int index)

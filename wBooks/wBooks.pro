@@ -1,4 +1,4 @@
-QT += core quick widgets svg xml
+QT += core quick widgets svg xml printsupport
 
 # You can make your code fail to compile if it uses deprecated APIs.
 # In order to do so, uncomment the following line.

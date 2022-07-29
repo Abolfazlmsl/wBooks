@@ -91,7 +91,7 @@ protected:
 //    void wheelEvent(QWheelEvent *event) override;
 
 private:
-    QAbstractTextDocumentLayout::PaintContext paintContext;
+//    QAbstractTextDocumentLayout::PaintContext paintContext;
     QImage m_cover;
     EPubDocument *m_document;
     int m_currentChapter;
@@ -107,6 +107,8 @@ private:
     bool lightMode = true;
     QString m_font;
     int m_fontSize;
+    QRectF rect;
+    int addHeight;
 
 signals:
     void contentsChanged(TreeModel *model);

@@ -400,31 +400,36 @@ Window {
                     Rectangle {
                         Layout.fillWidth: true
                         Layout.fillHeight: true
-                        color: "white"
-                        Flickable {
+                        color: "transparent"
+                        ListView{
                             id: pdf
+                            property double stride: (pdf.contentHeight) / 100
                             anchors.fill: parent
-                            contentWidth: bigImage.width
-                            contentHeight: bigImage.height
-                            boundsBehavior: Flickable.StopAtBounds
-                            Image{
+                            model: poppler.numPages
+                            spacing: 25
+                            clip: true
+                            interactive: false
+                            focus: true
+                            delegate:
+                                Image{
                                 id: bigImage
                                 sourceSize.width: mainStack.width
                                 sourceSize.height: mainStack.height
-                                source: (poppler.loaded && pdfview.currentIndex >= 0)?  "image://poppler/page/"+(pdfview.currentIndex+1): ""
+                                source: (poppler.loaded && pdfview.currentIndex >= 0)?  "image://poppler/page/"+(index+1): ""
                             }
+
                             MouseArea{
-                                id: pdfArea
                                 anchors.fill: parent
-                                propagateComposedEvents: true
                                 onWheel: {
-                                    if (pdf.contentY - wheel.angleDelta.y > 0 && pdf.contentY - wheel.angleDelta.y<pdf.contentHeight){
-                                        pdf.contentY = pdf.contentY - wheel.angleDelta.y
-                                    }else if(pdf.contentY - wheel.angleDelta.y < 0 && pdfview.currentIndex>0){
-                                        pdfview.currentIndex = pdfview.currentIndex - 1
-                                        pdf.contentY = pdf.contentHeight
-                                    }else if(pdf.contentY - wheel.angleDelta.y>pdf.contentHeight){
-                                        pdfview.currentIndex = pdfview.currentIndex + 1
+                                    if (epubslider.value-(wheel.angleDelta.y/80)*epubslider.stepSize >=0
+                                            && epubslider.value-(wheel.angleDelta.y/80)*epubslider.stepSize<=100){
+                                        epubslider.value = epubslider.value-(wheel.angleDelta.y/80)*epubslider.stepSize
+                                    }else if (epubslider.value-(wheel.angleDelta.y/80)*epubslider.stepSize <0){
+                                        epubslider.value = 0
+                                        pdf.positionViewAtBeginning()
+                                    }else if (epubslider.value-(wheel.angleDelta.y/80)*epubslider.stepSize>100){
+                                        epubslider.value = 100
+                                        pdf.positionViewAtEnd()
                                     }
                                 }
                             }
@@ -448,13 +453,17 @@ Window {
                         id: image
                         Image{
                             width: pdfview.width
-                            source: poppler.loaded? "image://poppler/page/" + (modelData+1): ""
+                            source: poppler.loaded? "image://poppler/page/" + (index+1): ""
                             sourceSize.width: width
                             MouseArea{
                                 anchors.fill: parent
+                                cursorShape: Qt.PointingHandCursor
                                 onClicked: {
-                                    image.ListView.view.currentIndex = index
-                                    image.ListView.view.focus = true
+                                    pdf.positionViewAtIndex(index, ListView.Beginning)
+                                    pdfview.positionViewAtIndex(index, ListView.Center)
+                                    epubslider.value = index * 100 / poppler.numPages
+//                                    image.ListView.view.currentIndex = index
+//                                    image.ListView.view.focus = true
                                 }
                             }
                         }
@@ -488,8 +497,17 @@ Window {
                         thisPageNumber = Math.ceil(value / setting.onepageHeight/setting.stepSize)
                         update()
                     }else{
-//                        pdf.contentY = (1.0 - epubslider.position) * (pdf.contentHeight - pdf.height)
-//                        setting.sliderValue = (1.0 - epubslider.position) * (pdf.contentHeight - pdf.height)
+                        setting.sliderValue = value
+                        pdf.contentY = value * pdf.stride
+                        if (value==from){
+                            pdf.positionViewAtBeginning()
+                        }else if (value==to){
+                            pdf.positionViewAtEnd()
+                        }
+
+                        if (pdf.indexAt(pdf.contentX, pdf.contentY) >= 0){
+                            thisPageNumber = pdf.indexAt(pdf.contentX, pdf.contentY) + 1
+                        }
                     }
                 }
             }
@@ -608,7 +626,7 @@ Window {
         id: poppler
     }
 
-    //-- Folder dialog --//
+    //-- File dialog --//
     FileDialog {
         id: fileDialog
         visible: false
@@ -639,7 +657,7 @@ Window {
                 browseText.text = fileName
                 poppler.path = urlToPath(""+fileDialog.file.toString())
                 thisPageNumber = 1
-                epubslider.stepSize = epubslider.to / pdf.height
+                epubslider.stepSize = epubslider.to / pdf.contentHeight
                 setting.stepSize = epubslider.stepSize
 //                sliderTotalHeight = sliderHeight
 
