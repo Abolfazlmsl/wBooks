@@ -29,7 +29,7 @@ void Widget::setFont(QString font, int fontSize)
     QFont serifFont(m_font, m_fontSize);
     m_document->setDefaultFont(serifFont);
 //    update();
-    m_document->documentLayout()->update(rect);
+    emit m_document->documentLayout()->update(rect);
 }
 
 void Widget::changeTheme(bool isLight)
@@ -211,7 +211,7 @@ void Widget::resizeEvent()
     m_document->clearCache();
     m_document->setPageSize(size());
 //    update();
-    m_document->documentLayout()->update(rect);
+    emit m_document->documentLayout()->update(rect);
 }
 
 int Widget::findBlockNumber(int index)

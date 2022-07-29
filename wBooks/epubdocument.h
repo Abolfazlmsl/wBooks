@@ -86,6 +86,7 @@ private:
     int m_page;
     int m_newpage;
     bool m_loaded;
+    QStringList items;
 
     TreeModel *tModel_content = new TreeModel();
 };

@@ -184,7 +184,7 @@ void EPubDocument::loadDocument()
     }
     qDebug() << "Opened in" << timer.restart() << "ms";
 
-    QStringList items = m_container->getItems();
+    items = m_container->getItems();
 
     QString cover = m_container->getStandardPage(EpubPageReference::CoverPage);
     if (!cover.isEmpty()) {
