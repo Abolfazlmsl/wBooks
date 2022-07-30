@@ -67,6 +67,8 @@ bool Widget::loadFile(const QString &path)
     m_document->setLoaded(false);
     m_document->clear();
     m_document->clearCache();
+    currentPage = 1;
+    m_yOffset = 0;
     m_document->openDocument(path);
     m_document->setPageSize(size());
     QFont serifFont(m_font, m_fontSize);
@@ -88,8 +90,13 @@ void Widget::scrollSlider(int amount)
 {
     int offset = m_yOffset + amount;
     //    offset = qMin(int(m_document->size().height() - m_document->pageSize().height()), offset);
-    if (offset > pageSize){m_yOffset = pageSize;}
-    else{m_yOffset = qMax(0, offset);}
+    if (offset > pageSize){
+        if (currentPage==m_document->docPage()){m_yOffset = pageSize;}
+        else{nextPage();}
+    }else if (offset < 0){
+        if (currentPage==1){m_yOffset = 0;}
+        else{previousPage();}
+    }else{m_yOffset = qMax(0, offset);}
     update();
 }
 
@@ -124,8 +131,8 @@ void Widget::paint(QPainter *painter)
     //    int page_number = qCeil(m_document->docSize().height()/m_document->pageSize().height());
 
     int page_number = m_document->docPage();
-    int page_new_number = m_document->docNewPage();
-    pageSize = page_new_number * m_document->pageSize().height();
+//    int page_new_number = m_document->docNewPage();
+    pageSize = m_document->documentLayout()->documentSize().height();
     setPageNumber(page_number);
     setBlockNumber(m_document->blockCount());
     setSliderHeight(pageSize);
@@ -249,16 +256,28 @@ QString Widget::copyBooktoDb(QString path, QString fileName)
 
 void Widget::previousPage()
 {
-    currentPage--;
-    m_document->updateDocument(currentPage);
-    m_yOffset = pageSize;
+//    m_document->clear();
+//    m_document->clearCache();
+//    currentPage--;
+//    m_document->updateDocument(currentPage);
+//    QFont serifFont(m_font, m_fontSize);
+//    m_document->setDefaultFont(serifFont);
+//    update();
+//    m_yOffset = m_document->documentLayout()->documentSize().height();
+    setCurrentPageNumber(currentPage-1);
 }
 
 void Widget::nextPage()
 {
-    currentPage++;
-    m_document->updateDocument(currentPage);
-    m_yOffset = 0;
+//    m_document->clear();
+//    m_document->clearCache();
+//    currentPage++;
+//    m_document->updateDocument(currentPage);
+//    QFont serifFont(m_font, m_fontSize);
+//    m_document->setDefaultFont(serifFont);
+//    update();
+//    m_yOffset = 0;
+    setCurrentPageNumber(currentPage+1);
 }
 
 void Widget::specificPage(int index)

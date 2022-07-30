@@ -302,7 +302,7 @@ Window {
             Row{
                 id: mainRow
                 Layout.fillWidth: true
-                Layout.preferredHeight: parent.height * 0.7
+                Layout.preferredHeight: parent.height * 0.67
                 Layout.leftMargin: 10
                 Layout.rightMargin: 10
                 clip: true
@@ -384,6 +384,10 @@ Window {
 
                             onBlockNumberChanged: {
                                 blocksNumber = blockNumber
+                            }
+
+                            onCurrentPageNumberChanged: {
+                                epubslider.value = currentPageNumber
                             }
 
                             MouseArea{
@@ -504,7 +508,7 @@ Window {
                         Label{
                             id: nextPage
                             anchors.fill: parent
-                            enabled: (epubslider.value==pagesNumber)?false:true
+                            enabled: (fileUploaded) ? (epubslider.value==pagesNumber)?false:true : false
                             text: Icons.chevron_left
                             font.family: webfont.name
                             font.pixelSize: Qt.application.font.pixelSize * 3
@@ -536,7 +540,7 @@ Window {
                         Label{
                             id: previousPage
                             anchors.fill: parent
-                            enabled: (epubslider.value==1)? false:true
+                            enabled: (fileUploaded) ? (epubslider.value==1)? false:true : false
                             text: Icons.chevron_right
                             font.family: webfont.name
                             font.pixelSize: Qt.application.font.pixelSize * 3
@@ -567,7 +571,7 @@ Window {
                 value: stepSize
                 Layout.fillWidth: true
                 Layout.preferredHeight: parent.height * 0.05
-                Layout.topMargin: 10
+                Layout.topMargin: 20
 
                 onValueChanged: {
                     if (setting.isEpubViewer){

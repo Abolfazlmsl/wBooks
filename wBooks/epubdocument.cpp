@@ -184,6 +184,7 @@ void EPubDocument::loadDocument()
 
     qDebug() << "Time restarted in " << timer.restart() << "ms";
 
+    items.clear();
     items = m_container->getItems();
 
     cover = m_container->getStandardPage(EpubPageReference::CoverPage);
@@ -191,7 +192,7 @@ void EPubDocument::loadDocument()
         items.prepend(cover);
     }
 
-    m_page = qCeil(items.length() / 10);
+    m_page = qCeil(items.length() / itemSpacing);
 
     QDomDocument domDoc;
     QTextCursor textCursor(this);
@@ -256,6 +257,9 @@ void EPubDocument::loadDocument()
 
     textCursor.endEditBlock();
     readContents();
+
+    m_loaded = true;
+    emit loadCompleted();
 }
 
 void EPubDocument::updateDocument(int page)
