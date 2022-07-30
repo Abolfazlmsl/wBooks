@@ -504,7 +504,7 @@ Window {
                         width: 30
                         height: width
                         radius: width/2
-                        color: (previousPage.enabled) ? "#E9E9E9":"#C2C2C2"
+                        color: (setting.lightMode) ? (previousPage.enabled) ? "#E9E9E9":"#C2C2C2" : (previousPage.enabled) ? "#C2C2C2":"#E9E9E9"
                         Label{
                             id: previousPage
                             anchors.fill: parent
@@ -536,7 +536,7 @@ Window {
                         width: 30
                         height: width
                         radius: width/2
-                        color: (nextPage.enabled) ? "#E9E9E9":"#C2C2C2"
+                        color: (setting.lightMode) ? (nextPage.enabled) ? "#E9E9E9":"#C2C2C2" : (nextPage.enabled) ? "#C2C2C2":"#E9E9E9"
                         Label{
                             id: nextPage
                             anchors.fill: parent
@@ -777,14 +777,14 @@ Window {
 
     Component.onCompleted: {
         epub.setSetting(setting.font, setting.fontSize, setting.lightMode)
-        if (setting.cPath !== ""){
-            var result = epub.loadFile(setting.cPath)
-            if (result){
-                fileUploaded = true
-                browseText.text = setting.openFileName
-                epubslider.value = setting.sliderValue
-            }
-        }
+//        if (setting.cPath !== ""){
+//            var result = epub.loadFile(setting.cPath)
+//            if (result){
+//                fileUploaded = true
+//                browseText.text = setting.openFileName
+//                epubslider.value = setting.sliderValue
+//            }
+//        }
 
         db.initDatabase();
     }
