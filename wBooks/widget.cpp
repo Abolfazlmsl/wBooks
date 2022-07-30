@@ -88,7 +88,8 @@ void Widget::scrollSlider(int amount)
 {
     int offset = m_yOffset + amount;
     //    offset = qMin(int(m_document->size().height() - m_document->pageSize().height()), offset);
-    m_yOffset = qMax(0, offset);
+    if (offset > pageSize){m_yOffset = pageSize;}
+    else{m_yOffset = qMax(0, offset);}
     update();
 }
 
@@ -248,28 +249,29 @@ QString Widget::copyBooktoDb(QString path, QString fileName)
 
 void Widget::previousPage()
 {
-    if (currentPage > 1){
-        currentPage--;
-        m_document->updateDocument(currentPage);
-        m_yOffset = pageSize;
-    }
+    currentPage--;
+    m_document->updateDocument(currentPage);
+    m_yOffset = pageSize;
 }
 
 void Widget::nextPage()
 {
-    if (currentPage < m_document->docPage()){
-        currentPage++;
-        m_document->updateDocument(currentPage);
-        m_yOffset = 0;
-    }
+    currentPage++;
+    m_document->updateDocument(currentPage);
+    m_yOffset = 0;
 }
 
 void Widget::specificPage(int index)
 {
+    m_document->clear();
+    m_document->clearCache();
     bool increase = true;
     if (index < currentPage){increase = false;}
     currentPage = index;
     m_document->updateDocument(currentPage);
+    QFont serifFont(m_font, m_fontSize);
+    m_document->setDefaultFont(serifFont);
+    update();
     if (increase){m_yOffset = 0;}
-    else{m_yOffset = pageSize;}
+    else{m_yOffset = m_document->documentLayout()->documentSize().height();}
 }

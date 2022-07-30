@@ -260,7 +260,6 @@ void EPubDocument::loadDocument()
 
 void EPubDocument::updateDocument(int page)
 {
-    this->clear();
     QDomDocument domDoc;
     QTextCursor textCursor(this);
     setBaseUrl(QUrl());

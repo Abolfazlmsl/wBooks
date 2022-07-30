@@ -255,16 +255,16 @@ Window {
                         color: (setting.lightMode) ? "transparent" : "#f7f7f7"
                     }
 
-//                    contentItem: Label{
-//                        text: fontSizeButton.displayText
-//                        font.pixelSize: Qt.application.font.pixelSize * 1
-//                        color: "black"
-//                        clip: true
+                    //                    contentItem: Label{
+                    //                        text: fontSizeButton.displayText
+                    //                        font.pixelSize: Qt.application.font.pixelSize * 1
+                    //                        color: "black"
+                    //                        clip: true
 
-//                        verticalAlignment: Qt.AlignVCenter
-//                        horizontalAlignment: Qt.AlignHCenter
+                    //                        verticalAlignment: Qt.AlignVCenter
+                    //                        horizontalAlignment: Qt.AlignHCenter
 
-//                    }
+                    //                    }
 
                     onValueModified: {
                         setting.fontSize = fontSizeButton.value
@@ -369,7 +369,7 @@ Window {
 
                             onSliderHeightChanged: {
 
-        //                        epubslider.to = sliderHeight
+                                //                        epubslider.to = sliderHeight
                                 sliderTotalHeight = sliderHeight
                             }
 
@@ -392,7 +392,7 @@ Window {
                                 propagateComposedEvents: true
                                 onWheel: {
                                     //                            epub.scroll(-wheel.angleDelta.y)
-//                                    epubslider.value = epubslider.value-wheel.angleDelta.y*setting.stepSize
+                                    //                                    epubslider.value = epubslider.value-wheel.angleDelta.y*setting.stepSize
                                     epub.scrollSlider(-wheel.angleDelta.y*setting.stepSize)
                                 }
                             }
@@ -466,8 +466,8 @@ Window {
                                     pdf.positionViewAtIndex(index, ListView.Beginning)
                                     pdfview.positionViewAtIndex(index, ListView.Center)
                                     epubslider.value = index * 100 / poppler.numPages
-//                                    image.ListView.view.currentIndex = index
-//                                    image.ListView.view.focus = true
+                                    //                                    image.ListView.view.currentIndex = index
+                                    //                                    image.ListView.view.focus = true
                                 }
                             }
                         }
@@ -489,29 +489,37 @@ Window {
                 id: changepage
                 Layout.fillWidth: true
                 Layout.preferredHeight: parent.height * 0.025
-                Layout.margins: 5
-                spacing: 30
+                Layout.topMargin: 4
+                spacing: 50
                 Item{Layout.fillWidth: true}
 
                 Item{
                     Layout.preferredWidth: 20
                     Layout.fillHeight: true
-                    Label{
-                        id: nextPage
-                        anchors.fill: parent
-                        text: Icons.chevron_left
-                        font.family: webfont.name
-                        font.pixelSize: Qt.application.font.pixelSize * 3
-
-                        verticalAlignment: Qt.AlignVCenter
-                        horizontalAlignment: Qt.AlignHCenter
-
-                        color: (setting.lightMode) ?"black":"white"
-                        MouseArea{
+                    Rectangle{
+                        width: 30
+                        height: width
+                        radius: width/2
+                        color: (nextPage.enabled) ? "#E9E9E9":"#C2C2C2"
+                        Label{
+                            id: nextPage
                             anchors.fill: parent
-                            cursorShape: Qt.PointingHandCursor
-                            onClicked: {
-                                epub.nextPage()
+                            enabled: (epubslider.value==pagesNumber)?false:true
+                            text: Icons.chevron_left
+                            font.family: webfont.name
+                            font.pixelSize: Qt.application.font.pixelSize * 3
+
+                            verticalAlignment: Qt.AlignVCenter
+                            horizontalAlignment: Qt.AlignHCenter
+
+                            color: (setting.lightMode) ?"black":"white"
+                            MouseArea{
+                                anchors.fill: parent
+                                cursorShape: Qt.PointingHandCursor
+                                onClicked: {
+                                    epubslider.value = epubslider.value + 1
+                                    //                                epub.nextPage()
+                                }
                             }
                         }
                     }
@@ -520,27 +528,34 @@ Window {
                 Item{
                     Layout.preferredWidth: 20
                     Layout.fillHeight: true
-                    Label{
-                        id: previousPage
-                        anchors.fill: parent
-                        text: Icons.chevron_right
-                        font.family: webfont.name
-                        font.pixelSize: Qt.application.font.pixelSize * 3
-
-                        verticalAlignment: Qt.AlignVCenter
-                        horizontalAlignment: Qt.AlignHCenter
-
-                        color: (setting.lightMode) ?"black":"white"
-                        MouseArea{
+                    Rectangle{
+                        width: 30
+                        height: width
+                        radius: width/2
+                        color: (previousPage.enabled) ? "#E9E9E9":"#C2C2C2"
+                        Label{
+                            id: previousPage
                             anchors.fill: parent
-                            cursorShape: Qt.PointingHandCursor
-                            onClicked: {
-                                epub.previousPage()
+                            enabled: (epubslider.value==1)? false:true
+                            text: Icons.chevron_right
+                            font.family: webfont.name
+                            font.pixelSize: Qt.application.font.pixelSize * 3
+
+                            verticalAlignment: Qt.AlignVCenter
+                            horizontalAlignment: Qt.AlignHCenter
+
+                            color: (setting.lightMode) ?"black":"white"
+                            MouseArea{
+                                anchors.fill: parent
+                                cursorShape: Qt.PointingHandCursor
+                                onClicked: {
+                                    epubslider.value = epubslider.value - 1
+                                    //                                epub.previousPage()
+                                }
                             }
                         }
                     }
                 }
-
                 Item{Layout.fillWidth: true}
             }
 
@@ -552,13 +567,14 @@ Window {
                 value: stepSize
                 Layout.fillWidth: true
                 Layout.preferredHeight: parent.height * 0.05
+                Layout.topMargin: 10
 
                 onValueChanged: {
                     if (setting.isEpubViewer){
                         setting.sliderValue = value
-//                        epub.scrollSlider(value/setting.stepSize)
+                        //                        epub.scrollSlider(value/setting.stepSize)
                         epub.specificPage(value)
-//                        thisPageNumber = Math.ceil(value / setting.onepageHeight/setting.stepSize)
+                        //                        thisPageNumber = Math.ceil(value / setting.onepageHeight/setting.stepSize)
                         thisPageNumber = value
                         update()
                     }else{
@@ -724,7 +740,7 @@ Window {
                 thisPageNumber = 1
                 epubslider.stepSize = epubslider.to / pdf.contentHeight
                 setting.stepSize = epubslider.stepSize
-//                sliderTotalHeight = sliderHeight
+                //                sliderTotalHeight = sliderHeight
 
                 setting.onepageHeight = pdf.height
 
@@ -768,5 +784,4 @@ Window {
 
         db.initDatabase();
     }
-
 }
