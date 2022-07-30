@@ -132,7 +132,7 @@ void Widget::paint(QPainter *painter)
 
     int page_number = m_document->docPage();
 //    int page_new_number = m_document->docNewPage();
-    pageSize = m_document->documentLayout()->documentSize().height();
+    pageSize = m_document->documentLayout()->documentSize().height() - m_document->pageSize().height();
     setPageNumber(page_number);
     setBlockNumber(m_document->blockCount());
     setSliderHeight(pageSize);
@@ -291,6 +291,7 @@ void Widget::specificPage(int index)
     QFont serifFont(m_font, m_fontSize);
     m_document->setDefaultFont(serifFont);
     update();
+//    m_yOffset = 0;
     if (increase){m_yOffset = 0;}
-    else{m_yOffset = m_document->documentLayout()->documentSize().height();}
+    else{m_yOffset = m_document->documentLayout()->documentSize().height() - m_document->pageSize().height();}
 }

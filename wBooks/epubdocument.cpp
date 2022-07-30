@@ -192,7 +192,7 @@ void EPubDocument::loadDocument()
         items.prepend(cover);
     }
 
-    m_page = qCeil(items.length() / itemSpacing);
+    m_page = qCeil(items.length() / itemSpacing) - 1;
 
     QDomDocument domDoc;
     QTextCursor textCursor(this);
@@ -200,10 +200,10 @@ void EPubDocument::loadDocument()
     textCursor.movePosition(QTextCursor::End);
 
     QTextBlockFormat pageBreak;
-    pageBreak.setPageBreakPolicy(QTextFormat::PageBreak_AlwaysBefore);
+//    pageBreak.setPageBreakPolicy(QTextFormat::PageBreak_AlwaysBefore);
 
     int num = 0;
-    for (int i=0; i<itemSpacing;i++){
+    for (int i=0; i<2;i++){
         if (i>=items.length()){break;}
         const QString &chapter = items[i];
         m_currentItem = m_container->getEpubItem(chapter);
@@ -271,10 +271,19 @@ void EPubDocument::updateDocument(int page)
     textCursor.movePosition(QTextCursor::End);
 
     QTextBlockFormat pageBreak;
-    pageBreak.setPageBreakPolicy(QTextFormat::PageBreak_AlwaysBefore);
+//    pageBreak.setPageBreakPolicy(QTextFormat::PageBreak_AlwaysBefore);
 
     int num = (page-1);
-    for (int i=(page-1)*itemSpacing; i<page*itemSpacing;i++){
+    int start;
+    int end;
+    if (page==1){
+        start = 0;
+        end = 2;
+    }else{
+        start = (page)*itemSpacing;
+        end = (page+1)*itemSpacing;
+    }
+    for (int i=start; i<end;i++){
         if (i>=items.length()){break;}
         const QString &chapter = items[i];
         m_currentItem = m_container->getEpubItem(chapter);

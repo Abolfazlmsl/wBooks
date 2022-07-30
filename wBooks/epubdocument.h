@@ -51,7 +51,7 @@ public:
     int docPage() {return m_page;}
 
     void openDocument(const QString &path);
-    int itemSpacing = 10;
+    int itemSpacing = 1;
 
     void readContents();
     void updateDocument(int page);
