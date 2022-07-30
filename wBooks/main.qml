@@ -392,7 +392,8 @@ Window {
                                 propagateComposedEvents: true
                                 onWheel: {
                                     //                            epub.scroll(-wheel.angleDelta.y)
-                                    epubslider.value = epubslider.value-wheel.angleDelta.y*setting.stepSize
+//                                    epubslider.value = epubslider.value-wheel.angleDelta.y*setting.stepSize
+                                    epub.scrollSlider(-wheel.angleDelta.y*setting.stepSize)
                                 }
                             }
 

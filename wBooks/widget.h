@@ -112,6 +112,7 @@ private:
     int m_fontSize;
     QRectF rect;
     int currentPage = 1;
+    float pageSize;
 
 signals:
     void contentsChanged(TreeModel *model);

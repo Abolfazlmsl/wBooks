@@ -29,7 +29,7 @@ void Widget::setFont(QString font, int fontSize)
     QFont serifFont(m_font, m_fontSize);
     m_document->setDefaultFont(serifFont);
     update();
-//    emit m_document->documentLayout()->update(rect);
+    //    emit m_document->documentLayout()->update(rect);
 }
 
 void Widget::changeTheme(bool isLight)
@@ -86,9 +86,9 @@ void Widget::scroll(int amount)
 
 void Widget::scrollSlider(int amount)
 {
-    //    int offset = m_yOffset + amount;
+    int offset = m_yOffset + amount;
     //    offset = qMin(int(m_document->size().height() - m_document->pageSize().height()), offset);
-    m_yOffset = qMax(0, amount);
+    m_yOffset = qMax(0, offset);
     update();
 }
 
@@ -111,29 +111,30 @@ void Widget::paint(QPainter *painter)
     }
     painter->setRenderHint(QPainter::Antialiasing, true);
     if (!m_document->loaded()) {
-//        if (lightMode){
-//            painter->setPen(Qt::black);
-//            painter->drawText(boundingRect(), Qt::AlignCenter, "Please choose an .epub file to open");
-//        }else{
-//            painter->setPen(Qt::white);
-//            painter->drawText(boundingRect(), Qt::AlignCenter, "Please choose an .epub file to open");
-//        }
+        //        if (lightMode){
+        //            painter->setPen(Qt::black);
+        //            painter->drawText(boundingRect(), Qt::AlignCenter, "Please choose an .epub file to open");
+        //        }else{
+        //            painter->setPen(Qt::white);
+        //            painter->drawText(boundingRect(), Qt::AlignCenter, "Please choose an .epub file to open");
+        //        }
         return;
     }
-//    int page_number = qCeil(m_document->docSize().height()/m_document->pageSize().height());
+    //    int page_number = qCeil(m_document->docSize().height()/m_document->pageSize().height());
 
     int page_number = m_document->docPage();
     int page_new_number = m_document->docNewPage();
+    pageSize = page_new_number * m_document->pageSize().height();
     setPageNumber(page_number);
     setBlockNumber(m_document->blockCount());
-    setSliderHeight(page_new_number * m_document->pageSize().height());
+    setSliderHeight(pageSize);
     setPageHeight(m_document->pageSize().height());
 
     QAbstractTextDocumentLayout::PaintContext paintContext;
 
-//    QRectF rect = QRectF(0,m_yOffset,m_document->pageSize().width(),m_yOffset+m_document->pageSize().height());
+    //    QRectF rect = QRectF(0,m_yOffset,m_document->pageSize().width(),m_yOffset+m_document->pageSize().height());
     rect = QRectF(0,0,m_document->pageSize().width(),m_document->pageSize().height());
-//    paintContext.clip = boundingRect();
+    //    paintContext.clip = boundingRect();
     paintContext.clip = rect;
     paintContext.clip.translate(0,m_yOffset);
 
@@ -162,22 +163,22 @@ void Widget::paint(QPainter *painter)
     painter->translate(0, -m_yOffset);
     painter->setClipRect(paintContext.clip);
 
-//    QTextCursor firstVisible = m_document->cursorForPosition(rect.topLeft());
-//    QTextCursor lastVisible = m_document->cursorForPosition(rect.bottomRight());
+    //    QTextCursor firstVisible = m_document->cursorForPosition(rect.topLeft());
+    //    QTextCursor lastVisible = m_document->cursorForPosition(rect.bottomRight());
 
-//    m_document->drawContents(painter, rect);
+    //    m_document->drawContents(painter, rect);
 
     m_document->documentLayout()->draw(painter, paintContext);
 
 
-//    QPrinter MyPrinter(QPrinter::HighResolution);
-//    MyPrinter.setOutputFormat(QPrinter::PdfFormat);
-//    MyPrinter.setOutputFileName("test.pdf");
-//    MyPrinter.setPageSize(QPrinter::Letter);
-//    MyPrinter.setColorMode(QPrinter::Color);
-//    MyPrinter.setOrientation(QPrinter::Landscape);
+    //    QPrinter MyPrinter(QPrinter::HighResolution);
+    //    MyPrinter.setOutputFormat(QPrinter::PdfFormat);
+    //    MyPrinter.setOutputFileName("test.pdf");
+    //    MyPrinter.setPageSize(QPrinter::Letter);
+    //    MyPrinter.setColorMode(QPrinter::Color);
+    //    MyPrinter.setOrientation(QPrinter::Landscape);
 
-//    m_document->print(&MyPrinter);
+    //    m_document->print(&MyPrinter);
 }
 
 //void Widget::keyPressEvent(QKeyEvent *event)
@@ -210,7 +211,7 @@ void Widget::resizeEvent()
     m_document->clearCache();
     m_document->setPageSize(size());
     update();
-//    emit m_document->documentLayout()->update(rect);
+    //    emit m_document->documentLayout()->update(rect);
 }
 
 int Widget::findBlockNumber(int index)
@@ -250,17 +251,25 @@ void Widget::previousPage()
     if (currentPage > 1){
         currentPage--;
         m_document->updateDocument(currentPage);
+        m_yOffset = pageSize;
     }
 }
 
 void Widget::nextPage()
 {
-    currentPage++;
-    m_document->updateDocument(currentPage);
+    if (currentPage < m_document->docPage()){
+        currentPage++;
+        m_document->updateDocument(currentPage);
+        m_yOffset = 0;
+    }
 }
 
 void Widget::specificPage(int index)
 {
+    bool increase = true;
+    if (index < currentPage){increase = false;}
     currentPage = index;
     m_document->updateDocument(currentPage);
+    if (increase){m_yOffset = 0;}
+    else{m_yOffset = pageSize;}
 }
