@@ -203,8 +203,7 @@ void EPubDocument::loadDocument()
 //    pageBreak.setPageBreakPolicy(QTextFormat::PageBreak_AlwaysBefore);
 
     int num = 0;
-    for (int i=0; i<2;i++){
-        if (i>=items.length()){break;}
+    for (int i=1; i<2;i++){
         const QString &chapter = items[i];
         m_currentItem = m_container->getEpubItem(chapter);
         if (m_currentItem.path.isEmpty()) {
@@ -274,16 +273,7 @@ void EPubDocument::updateDocument(int page)
 //    pageBreak.setPageBreakPolicy(QTextFormat::PageBreak_AlwaysBefore);
 
     int num = (page-1);
-    int start;
-    int end;
-    if (page==1){
-        start = 0;
-        end = 2;
-    }else{
-        start = (page)*itemSpacing;
-        end = (page+1)*itemSpacing;
-    }
-    for (int i=start; i<end;i++){
+    for (int i=(page)*itemSpacing; i<(page+1)*itemSpacing;i++){
         if (i>=items.length()){break;}
         const QString &chapter = items[i];
         m_currentItem = m_container->getEpubItem(chapter);
