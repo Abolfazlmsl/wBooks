@@ -13,7 +13,7 @@ EPubDocument::EPubDocument(QObject *parent) : QTextDocument(parent),
 //    });
 
     connect(documentLayout(), &QAbstractTextDocumentLayout::pageCountChanged, this, [=](const int &newPage) {
-        if (filetype == epub2){m_page = newPage;}
+        if (filetype == epub2 && m_page==1){m_page = newPage;}
         m_newpage = newPage;
         m_loaded = true;
         emit loadCompleted();
@@ -276,6 +276,8 @@ void EPubDocument::loadDocument()
     readContents();
 
     if (filetype == epub1){
+        this->setPageSize(size());
+        this->exportPdf();
         m_loaded = true;
         emit loadCompleted();
     }
@@ -317,7 +319,19 @@ void EPubDocument::updateDocument(int page)
 //    qDebug() << "Base url:" << baseUrl();
     textCursor.endEditBlock();
 
-//    emit loadCompleted();
+    //    emit loadCompleted();
+}
+
+void EPubDocument::exportPdf()
+{
+    QPrinter MyPrinter(QPrinter::HighResolution);
+    MyPrinter.setOutputFormat(QPrinter::PdfFormat);
+    MyPrinter.setOutputFileName("test.pdf");
+    MyPrinter.setPageSize(QPrinter::Letter);
+    MyPrinter.setColorMode(QPrinter::Color);
+    MyPrinter.setOrientation(QPrinter::Landscape);
+
+    this->print(&MyPrinter);
 }
 
 void EPubDocument::fixImages(QDomDocument &newDocument)

@@ -2,7 +2,6 @@
 
 #include "epubdocument.h"
 #include <QScrollArea>
-#include <QPrinter>
 
 Widget::Widget(QQuickItem *parent)
     : QQuickPaintedItem(parent),
@@ -29,6 +28,9 @@ void Widget::setFont(QString font, int fontSize)
     m_fontSize = fontSize;
     QFont serifFont(m_font, m_fontSize);
     m_document->setDefaultFont(serifFont);
+    if (m_document->getFiletype() == 1){
+        m_document->setPageSize(m_document->pageSize().height()*m_document->docNewPage()/m_document->docPage());
+    }
     update();
     if (m_document->getFiletype() == 0){
         m_document->setLoaded(true);
@@ -191,15 +193,10 @@ void Widget::paint(QPainter *painter)
 
     m_document->documentLayout()->draw(painter, paintContext);
 
-
-    //    QPrinter MyPrinter(QPrinter::HighResolution);
-    //    MyPrinter.setOutputFormat(QPrinter::PdfFormat);
-    //    MyPrinter.setOutputFileName("test.pdf");
-    //    MyPrinter.setPageSize(QPrinter::Letter);
-    //    MyPrinter.setColorMode(QPrinter::Color);
-    //    MyPrinter.setOrientation(QPrinter::Landscape);
-
-    //    m_document->print(&MyPrinter);
+    if (m_document->getFiletype() == 1 && !m_document->getpdfLoaded()){
+        m_document->exportPdf();
+        m_document->setpdfLoaded(true);
+    }
 }
 
 //void Widget::keyPressEvent(QKeyEvent *event)

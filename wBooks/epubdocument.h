@@ -25,6 +25,8 @@
 #include <QAbstractItemModel>
 #include <QElapsedTimer>
 #include <qmath.h>
+#include <QPrinter>
+
 #include "tree_model.h"
 
 #ifdef DEBUG_CSS
@@ -51,6 +53,8 @@ public:
     int docNewPage() {return m_newpage;}
     int docPage() {return m_page;}
     FileType getFiletype() {return filetype;}
+    bool getpdfLoaded() { return m_pdfLoaded; }
+    void setpdfLoaded(bool isload) {m_pdfLoaded = isload;}
 
     void openDocument(const QString &path);
     int itemSpacing = 1;
@@ -59,6 +63,7 @@ public:
     void updateDocument(int page);
 
     void clearCache() {m_renderedSvgs.clear();}
+    void exportPdf();
 
     QVariant getModelData(int index);
 
@@ -93,6 +98,7 @@ private:
     QStringList items;
     QString cover;
     FileType filetype = epub1;
+    bool m_pdfLoaded = false;
 
     TreeModel *tModel_content = new TreeModel();
 };
