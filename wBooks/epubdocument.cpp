@@ -214,7 +214,7 @@ void EPubDocument::loadDocument()
 
     if (filetype == epub1){
         start = 1;
-        end = items.length();
+        end = 2;
     }else{
         start = 0;
         end = items.length();

@@ -28,7 +28,7 @@ void Widget::setFont(QString font, int fontSize, QString type)
     m_fontSize = fontSize;
     QFont serifFont(m_font, m_fontSize);
     m_document->setDefaultFont(serifFont);
-    if (type=="fontsize") {m_document->setpdfLoaded(false);}
+//    if (type=="fontsize") {m_document->setpdfLoaded(false);}
     update();
     if (m_document->getFiletype() == 0){m_document->setLoaded(true);}
     //    emit m_document->documentLayout()->update(rect);
@@ -102,10 +102,18 @@ void Widget::scrollSlider(int amount)
         }else{m_yOffset = qMax(0, offset);}
         update();
     }else{
-        if (offset > (currentPage-1) * (m_document->pageSize().height())){
-            if (currentPage<m_document->docPage()) {nextPage();}
+        if (m_document->getFiletype() == 0){
+            if (offset > (currentPage-1) * (m_document->pageSize().height())){
+                if (currentPage<m_document->docPage()) {nextPage();}
+            }else{
+                if (currentPage>1) {previousPage();}
+            }
         }else{
-            if (currentPage>1) {previousPage();}
+            if (offset > (currentPage-1) * (addHeight)){
+                if (currentPage<m_document->docPage()) {nextPage();}
+            }else{
+                if (currentPage>1) {previousPage();}
+            }
         }
     }
 }
