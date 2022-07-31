@@ -123,6 +123,7 @@ private:
     QRectF rect;
     int currentPage = 1;
     float pageSize;
+    int addHeight;
 
 signals:
     void contentsChanged(TreeModel *model);

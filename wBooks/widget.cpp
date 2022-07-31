@@ -117,7 +117,12 @@ void Widget::scrollPage(int amount)
 //    int offset = currentPage * (m_document->size().height());
     //    offset = qMin(int(m_document->size().height() - m_document->pageSize().height()), offset);
 //    m_yOffset = qMax(0, offset);
-    m_yOffset = (amount-1) * (m_document->pageSize().height());
+    if (m_document->getFiletype() == 0){
+        m_yOffset = (amount-1) * (m_document->pageSize().height());
+    }else{
+        m_yOffset = (amount-1) * addHeight;
+    }
+
     update();
 }
 
@@ -142,17 +147,24 @@ void Widget::paint(QPainter *painter)
     //    int page_number = qCeil(m_document->docSize().height()/m_document->pageSize().height());
 
     int page_number = m_document->docPage();
-//    int page_new_number = m_document->docNewPage();
+    int page_new_number = m_document->docNewPage();
+    addHeight = qFloor(page_new_number*m_document->pageSize().height())/page_number;
     pageSize = m_document->documentLayout()->documentSize().height() - m_document->pageSize().height();
     setPageNumber(page_number);
     setBlockNumber(m_document->blockCount());
     setSliderHeight(pageSize);
-    setPageHeight(m_document->pageSize().height());
 
+    if (m_document->getFiletype() == 0){
+        setPageHeight(m_document->pageSize().height());
+        rect = QRectF(0,0,m_document->pageSize().width(),m_document->pageSize().height());
+    }else{
+        setPageHeight(addHeight);
+        rect = QRectF(0,0,m_document->pageSize().width(),addHeight);
+    }
     QAbstractTextDocumentLayout::PaintContext paintContext;
 
     //    QRectF rect = QRectF(0,m_yOffset,m_document->pageSize().width(),m_yOffset+m_document->pageSize().height());
-    rect = QRectF(0,0,m_document->pageSize().width(),m_document->pageSize().height());
+
     //    paintContext.clip = boundingRect();
     paintContext.clip = rect;
     paintContext.clip.translate(0,m_yOffset);

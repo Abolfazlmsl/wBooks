@@ -13,7 +13,7 @@ EPubDocument::EPubDocument(QObject *parent) : QTextDocument(parent),
 //    });
 
     connect(documentLayout(), &QAbstractTextDocumentLayout::pageCountChanged, this, [=](const int &newPage) {
-        if (filetype == epub2){m_page = newPage;}
+        if (filetype == epub2 && m_page==1){m_page = newPage;}
         m_newpage = newPage;
         m_loaded = true;
         emit loadCompleted();
