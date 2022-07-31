@@ -193,7 +193,7 @@ Window {
 
                     Keys.onEnterPressed: {
                         if (parseInt(input_search.inputText.text) > 0 && parseInt(input_search.inputText.text) <= pagesNumber){
-                            epubslider.value = parseInt(input_search.inputText.text) * setting.onepageHeight * setting.stepSize
+                            epubslider.value = parseInt(input_search.inputText.text)
                         }
                     }
                 }
