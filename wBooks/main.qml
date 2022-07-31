@@ -232,7 +232,7 @@ Window {
                         if (setting.font !== fontButton.currentText){
                             setting.font = fontButton.currentText
                             setting.fontCurrentIndex = fontButton.currentIndex
-                            epub.setFont(fontButton.currentText, fontSizeButton.value)
+                            epub.setFont(fontButton.currentText, fontSizeButton.value, "font")
                         }
                     }
                 }
@@ -268,7 +268,7 @@ Window {
 
                     onValueModified: {
                         setting.fontSize = fontSizeButton.value
-                        epub.setFont(fontButton.currentText, fontSizeButton.value)
+                        epub.setFont(fontButton.currentText, fontSizeButton.value, "fontsize")
                     }
                 }
 

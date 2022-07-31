@@ -21,20 +21,16 @@ Widget::~Widget()
 
 }
 
-void Widget::setFont(QString font, int fontSize)
+void Widget::setFont(QString font, int fontSize, QString type)
 {
     m_document->setLoaded(false);
     m_font = font;
     m_fontSize = fontSize;
     QFont serifFont(m_font, m_fontSize);
     m_document->setDefaultFont(serifFont);
-    if (m_document->getFiletype() == 1){
-        m_document->setPageSize(m_document->pageSize().height()*m_document->docNewPage()/m_document->docPage());
-    }
+    if (type=="fontsize") {m_document->setpdfLoaded(false);}
     update();
-    if (m_document->getFiletype() == 0){
-        m_document->setLoaded(true);
-    }
+    if (m_document->getFiletype() == 0){m_document->setLoaded(true);}
     //    emit m_document->documentLayout()->update(rect);
 }
 
