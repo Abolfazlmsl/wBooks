@@ -13,6 +13,7 @@ EPubDocument::EPubDocument(QObject *parent) : QTextDocument(parent),
 //    });
 
     connect(documentLayout(), &QAbstractTextDocumentLayout::pageCountChanged, this, [=](const int &newPage) {
+        if (filetype == epub2){m_page = newPage;}
         m_newpage = newPage;
         m_loaded = true;
         emit loadCompleted();
@@ -194,6 +195,12 @@ void EPubDocument::loadDocument()
 
     m_page = qCeil(items.length() / itemSpacing) - 1;
 
+    if (m_page > 10){filetype = epub1;}
+    else{
+        filetype = epub2;
+        m_page = 1;
+    }
+
     QDomDocument domDoc;
     QTextCursor textCursor(this);
     textCursor.beginEditBlock();
@@ -202,8 +209,19 @@ void EPubDocument::loadDocument()
     QTextBlockFormat pageBreak;
 //    pageBreak.setPageBreakPolicy(QTextFormat::PageBreak_AlwaysBefore);
 
+    int start;
+    int end;
+
+    if (filetype == epub1){
+        start = 1;
+        end = 2;
+    }else{
+        start = 0;
+        end = items.length();
+    }
+
     int num = 0;
-    for (int i=1; i<2;i++){
+    for (int i=start; i<end;i++){
         const QString &chapter = items[i];
         m_currentItem = m_container->getEpubItem(chapter);
         if (m_currentItem.path.isEmpty()) {
@@ -257,8 +275,10 @@ void EPubDocument::loadDocument()
     textCursor.endEditBlock();
     readContents();
 
-    m_loaded = true;
-    emit loadCompleted();
+    if (filetype == epub1){
+        m_loaded = true;
+        emit loadCompleted();
+    }
 }
 
 void EPubDocument::updateDocument(int page)
@@ -297,7 +317,7 @@ void EPubDocument::updateDocument(int page)
 //    qDebug() << "Base url:" << baseUrl();
     textCursor.endEditBlock();
 
-    emit loadCompleted();
+//    emit loadCompleted();
 }
 
 void EPubDocument::fixImages(QDomDocument &newDocument)

@@ -43,12 +43,14 @@ public:
     explicit EPubDocument(QObject *parent = nullptr);
     virtual ~EPubDocument();
 
+    enum FileType { epub1, epub2 };
     bool loaded() { return m_loaded; }
     void setLoaded(bool isLoad) { m_loaded = isLoad; }
 
     QSizeF docSize() {return m_docSize;}
     int docNewPage() {return m_newpage;}
     int docPage() {return m_page;}
+    FileType getFiletype() {return filetype;}
 
     void openDocument(const QString &path);
     int itemSpacing = 1;
@@ -90,6 +92,7 @@ private:
     bool m_loaded;
     QStringList items;
     QString cover;
+    FileType filetype = epub1;
 
     TreeModel *tModel_content = new TreeModel();
 };

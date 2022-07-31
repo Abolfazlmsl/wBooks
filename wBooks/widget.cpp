@@ -24,11 +24,15 @@ Widget::~Widget()
 
 void Widget::setFont(QString font, int fontSize)
 {
+    m_document->setLoaded(false);
     m_font = font;
     m_fontSize = fontSize;
     QFont serifFont(m_font, m_fontSize);
     m_document->setDefaultFont(serifFont);
     update();
+    if (m_document->getFiletype() == 0){
+        m_document->setLoaded(true);
+    }
     //    emit m_document->documentLayout()->update(rect);
 }
 
@@ -89,24 +93,33 @@ void Widget::scroll(int amount)
 void Widget::scrollSlider(int amount)
 {
     int offset = m_yOffset + amount;
-    //    offset = qMin(int(m_document->size().height() - m_document->pageSize().height()), offset);
-    if (offset > pageSize){
-        if (currentPage==m_document->docPage()){m_yOffset = pageSize;}
-        else{nextPage();}
-    }else if (offset < 0){
-        if (currentPage==1){m_yOffset = 0;}
-        else{previousPage();}
-    }else{m_yOffset = qMax(0, offset);}
-    update();
+    if (m_document->getFiletype() == 0){
+        //    offset = qMin(int(m_document->size().height() - m_document->pageSize().height()), offset);
+        if (offset > pageSize){
+            if (currentPage==m_document->docPage()){m_yOffset = pageSize;}
+            else{nextPage();}
+        }else if (offset < 0){
+            if (currentPage==1){m_yOffset = 0;}
+            else{previousPage();}
+        }else{m_yOffset = qMax(0, offset);}
+        update();
+    }else{
+        if (offset > (currentPage-1) * (m_document->pageSize().height())){
+            if (currentPage<m_document->docPage()) {nextPage();}
+        }else{
+            if (currentPage>1) {previousPage();}
+        }
+    }
 }
 
 void Widget::scrollPage(int amount)
 {
-    int currentPage = m_yOffset / (m_document->size().height());
-    currentPage += amount;
-    int offset = currentPage * (m_document->size().height());
+//    int currentPage = m_yOffset / (m_document->size().height());
+//    currentPage += amount;
+//    int offset = currentPage * (m_document->size().height());
     //    offset = qMin(int(m_document->size().height() - m_document->pageSize().height()), offset);
-    m_yOffset = qMax(0, offset);
+//    m_yOffset = qMax(0, offset);
+    m_yOffset = (amount-1) * (m_document->pageSize().height());
     update();
 }
 
@@ -282,16 +295,25 @@ void Widget::nextPage()
 
 void Widget::specificPage(int index)
 {
-    m_document->clear();
-    m_document->clearCache();
-    bool increase = true;
-    if (index < currentPage){increase = false;}
-    currentPage = index;
-    m_document->updateDocument(currentPage);
-    QFont serifFont(m_font, m_fontSize);
-    m_document->setDefaultFont(serifFont);
-    update();
-//    m_yOffset = 0;
-    if (increase){m_yOffset = 0;}
-    else{m_yOffset = m_document->documentLayout()->documentSize().height() - m_document->pageSize().height();}
+    if (m_document->getFiletype() == 0){
+        m_document->setLoaded(false);
+        m_document->clear();
+        m_document->clearCache();
+        bool increase = true;
+        if (index < currentPage){increase = false;}
+        currentPage = index;
+        m_document->updateDocument(currentPage);
+//        QFont serifFont(m_font, m_fontSize);
+//        m_document->setDefaultFont(serifFont);
+//        update();
+        emit m_document->documentLayout()->pageCountChanged(pageNumber());
+        //    m_yOffset = 0;
+        if (increase){m_yOffset = 0;}
+        else{m_yOffset = m_document->documentLayout()->documentSize().height() - m_document->pageSize().height();}
+    }else{
+        if (m_document->loaded()){
+            currentPage = index;
+            scrollPage(currentPage);
+        }
+    }
 }
