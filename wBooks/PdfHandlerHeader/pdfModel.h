@@ -22,9 +22,10 @@ public:
 
   Q_PROPERTY(QString path READ getPath WRITE setPath NOTIFY pathChanged)
   Q_PROPERTY(int numPages READ getNumPages NOTIFY numPagesChanged)
-  Q_PROPERTY(bool loaded READ getLoaded NOTIFY loadedChanged)
+  Q_PROPERTY(bool loaded READ getLoaded WRITE setLoaded NOTIFY loadedChanged)
 
   void setPath(QString &pathName);
+  void setLoaded(bool isLoad) {loaded = isLoad;}
   QString getPath() const { return path; }
   int getNumPages();
   bool getLoaded() const;

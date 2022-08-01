@@ -317,6 +317,7 @@ Window {
                 Layout.rightMargin: 10
                 clip: true
 
+                // pdf small images Animation
                 ParallelAnimation {
                     id: showImagesAnimpdf
                     NumberAnimation { target: mainStack; property: "width"; to: mainRow.width * 0.875; duration: 0 }
@@ -329,6 +330,7 @@ Window {
                     NumberAnimation { target: pdfview; property: "Layout.preferredWidth"; to: 0; duration: 0 }
                 }
 
+                // epub small images Animation
                 ParallelAnimation {
                     id: showImagesAnimepub
                     NumberAnimation { target: mainStack; property: "width"; to: mainRow.width * 0.875; duration: 0 }
@@ -428,10 +430,9 @@ Window {
                                         }
                                     }else{
                                         popplerepub.path = pdfPath
-                                        epubModel.clear()
-                                        for (var i=0; i<popplerepub.numPages;i++){
+                                        for (var j=0; j<popplerepub.numPages;j++){
                                             epubModel.append({
-                                                             "url": i
+                                                             "url": "image://poppler/page/" + (j+1)
                                                              })
                                         }
                                     }
@@ -459,7 +460,7 @@ Window {
                                 Layout.fillHeight: true
                                 Layout.preferredWidth: 0
 //                                model: popplerepub.numPages
-                                model: epubModel.count
+                                model: epubModel
                                 clip: true
                                 focus: true
                                 ScrollBar.vertical: ScrollBar{}
@@ -469,8 +470,9 @@ Window {
                                     id: image
                                     Image{
                                         width: epubview.width
-                                        source: popplerepub.loaded? (epub.getEpubType() === 0) ? epubModel.get(index).url: "image://poppler/page/" + (index+1): ""
+                                        source: popplerepub.loaded? model.url:""
                                         sourceSize.width: width
+                                        cache: false
                                         MouseArea{
                                             anchors.fill: parent
                                             cursorShape: Qt.PointingHandCursor
@@ -806,6 +808,7 @@ Window {
                 path = path.replace(/^(file:\/{3})/,"")
                 var fileName = path.slice(path.lastIndexOf("/")+1)
                 browseText.text = fileName
+                popplerepub.loaded = false;
                 epubModel.clear()
                 var result = epub.loadFile(path)
                 if (result){
