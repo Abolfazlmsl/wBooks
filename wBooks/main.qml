@@ -505,7 +505,7 @@ Window {
 
                             ListView{
                                 id: pdf
-                                property double stride: (pdf.contentHeight) / 100
+                                property double stride: (pdf.contentHeight) / (poppler.numPages+1)
                                 Layout.fillHeight: true
                                 Layout.preferredWidth: parent.width
                                 model: poppler.numPages
@@ -521,22 +521,40 @@ Window {
                                     source: (poppler.loaded && pdfview.currentIndex >= 0)?  "image://poppler/page/"+(index+1): ""
                                 }
 
+//                                MouseArea {
+//                                    anchors.fill: pdf
+//                                    onWheel: {
+//                                        pdf.flick(0, wheel.angleDelta.y * 5)
+//                                        epubslider.value = pdf.contentY
+//                                        if (pdf.indexAt(pdf.contentX, pdf.contentY) >= 0){
+//                                            thisPageNumber = pdf.indexAt(pdf.contentX, pdf.contentY) + 1
+//                                        }
+//                                    }
+//                                }
+
+                                onContentHeightChanged: {
+                                    epubslider.to = poppler.numPages
+                                    epubslider.stepSize = epubslider.to / pdf.contentHeight
+                                    setting.stepSize = epubslider.stepSize
+                                }
+
                                 MouseArea{
                                     anchors.fill: parent
                                     onWheel: {
-                                        if (epubslider.value-(wheel.angleDelta.y/80)*epubslider.stepSize >=0
-                                                && epubslider.value-(wheel.angleDelta.y/80)*epubslider.stepSize<=100){
-                                            epubslider.value = epubslider.value-(wheel.angleDelta.y/80)*epubslider.stepSize
-                                        }else if (epubslider.value-(wheel.angleDelta.y/80)*epubslider.stepSize <0){
+                                        if (epubslider.value-(wheel.angleDelta.y)*epubslider.stepSize >=0
+                                                && epubslider.value-(wheel.angleDelta.y)*epubslider.stepSize<=poppler.numPages){
+                                            epubslider.value = epubslider.value-(wheel.angleDelta.y)*epubslider.stepSize
+                                        }else if (epubslider.value-(wheel.angleDelta.y)*epubslider.stepSize <0){
                                             epubslider.value = 0
                                             pdf.positionViewAtBeginning()
-                                        }else if (epubslider.value-(wheel.angleDelta.y/80)*epubslider.stepSize>100){
-                                            epubslider.value = 100
+                                        }else if (epubslider.value-(wheel.angleDelta.y)*epubslider.stepSize>poppler.numPages){
+                                            epubslider.value = poppler.numPages
                                             pdf.positionViewAtEnd()
                                         }
                                     }
                                 }
                             }
+
 
                             ListView{
                                 id: pdfview
@@ -556,9 +574,10 @@ Window {
                                             anchors.fill: parent
                                             cursorShape: Qt.PointingHandCursor
                                             onClicked: {
+
+                                                epubslider.value = index+1
                                                 pdf.positionViewAtIndex(index, ListView.Beginning)
                                                 pdfview.positionViewAtIndex(index, ListView.Center)
-                                                epubslider.value = index * 100 / poppler.numPages
                                                 //                                    image.ListView.view.currentIndex = index
                                                 //                                    image.ListView.view.focus = true
                                             }
@@ -573,6 +592,7 @@ Window {
                                     }
                                 }
                             }
+
                         }
                     }
                 }
@@ -694,8 +714,8 @@ Window {
                 id: epubslider
                 enabled: fileUploaded
                 clip: true
-                from: stepSize
-                value: stepSize
+//                from: stepSize
+//                value: stepSize
                 Layout.fillWidth: true
                 Layout.preferredHeight: parent.height * 0.05
                 Layout.topMargin: 20
@@ -710,6 +730,7 @@ Window {
                         update()
                     }else{
                         setting.sliderValue = value
+
                         pdf.contentY = value * pdf.stride
                         if (value==from){
                             pdf.positionViewAtBeginning()
@@ -826,12 +847,9 @@ Window {
                 browseText.text = fileName
                 poppler.path = urlToPath(""+fileDialog.file.toString())
                 thisPageNumber = 1
-                epubslider.stepSize = epubslider.to / pdf.contentHeight
-                setting.stepSize = epubslider.stepSize
-                //                sliderTotalHeight = sliderHeight
 
-                setting.onepageHeight = pdf.height
-
+                epubslider.from = 1
+                epubslider.value = 1
                 pagesNumber = poppler.numPages
 
                 fileUploaded = true
