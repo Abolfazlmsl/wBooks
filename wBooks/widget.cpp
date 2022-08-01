@@ -12,6 +12,10 @@ Widget::Widget(QQuickItem *parent)
         update();
     });
 
+    connect(m_document, &EPubDocument::loadPdfFile, this, [&]() {
+        managePdfFile();
+    });
+
     connect(m_document, &EPubDocument::loadContents, this, &Widget::setContents);
 
 }
@@ -30,7 +34,7 @@ void Widget::setFont(QString font, int fontSize, QString type)
     m_document->setDefaultFont(serifFont);
 //    if (type=="fontsize") {m_document->setpdfLoaded(false);}
     update();
-    if (m_document->getFiletype() == 0){m_document->setLoaded(true);}
+    if (getEpubType() == 0){m_document->setLoaded(true);}
     //    emit m_document->documentLayout()->update(rect);
 }
 
@@ -92,7 +96,7 @@ void Widget::scroll(int amount)
 void Widget::scrollSlider(int amount)
 {
     int offset = m_yOffset + amount;
-    if (m_document->getFiletype() == 0){
+    if (getEpubType() == 0){
         //    offset = qMin(int(m_document->size().height() - m_document->pageSize().height()), offset);
         if (offset > pageSize){
             if (currentPage==m_document->docPage()){m_yOffset = pageSize;}
@@ -103,7 +107,7 @@ void Widget::scrollSlider(int amount)
         }else{m_yOffset = qMax(0, offset);}
         update();
     }else{
-        if (m_document->getFiletype() == 0){
+        if (getEpubType() == 0){
             if (offset > (currentPage-1) * (m_document->pageSize().height())){
                 if (currentPage<m_document->docPage()) {nextPage();}
             }else{
@@ -126,7 +130,7 @@ void Widget::scrollPage(int amount)
 //    int offset = currentPage * (m_document->size().height());
     //    offset = qMin(int(m_document->size().height() - m_document->pageSize().height()), offset);
 //    m_yOffset = qMax(0, offset);
-    if (m_document->getFiletype() == 0){
+    if (getEpubType() == 0){
         m_yOffset = (amount-1) * (m_document->pageSize().height());
     }else{
         m_yOffset = (amount-1) * addHeight;
@@ -163,7 +167,7 @@ void Widget::paint(QPainter *painter)
     setBlockNumber(m_document->blockCount());
     setSliderHeight(pageSize);
 
-    if (m_document->getFiletype() == 0){
+    if (getEpubType() == 0){
         setPageHeight(m_document->pageSize().height());
         rect = QRectF(0,0,m_document->pageSize().width(),m_document->pageSize().height());
     }else{
@@ -209,12 +213,6 @@ void Widget::paint(QPainter *painter)
     //    m_document->drawContents(painter, rect);
 
     m_document->documentLayout()->draw(painter, paintContext);
-
-    if (m_document->getFiletype() == 1 && !m_document->getpdfLoaded()){
-        m_document->exportPdf();
-        m_document->setpdfLoaded(true);
-        setPdfPath("test.pdf");
-    }
 }
 
 //void Widget::keyPressEvent(QKeyEvent *event)
@@ -248,7 +246,7 @@ void Widget::resizeEvent()
     m_document->clearCache();
     m_document->setPageSize(size());
     update();
-    if (m_document->getFiletype() == 0){m_document->setLoaded(true);}
+    if (getEpubType() == 0){m_document->setLoaded(true);}
     //    emit m_document->documentLayout()->update(rect);
 }
 
@@ -269,15 +267,16 @@ void Widget::setSetting(QString font, int fontSize, bool mode)
     lightMode = mode;
 }
 
-QString Widget::copyBooktoDb(QString path, QString fileName)
+QString Widget::copytoDb(QString path, QString folder, QString fileName)
 {
     QString str = path.replace("\\", "/");
     QDir dir = str;
-    if(!dir.exists("Files")){
-        dir.mkdir("Files");
+    if(!dir.exists(folder)){
+        dir.mkdir(folder);
     }
-    QString cPath = str+"/Files/"+fileName;
+    QString cPath = str+"/"+folder+"/"+fileName;
     bool state = QFile::copy(m_path, cPath);
+
     if (state){
         return cPath;
     }
@@ -312,7 +311,7 @@ void Widget::nextPage()
 
 void Widget::specificPage(int index)
 {
-    if (m_document->getFiletype() == 0){
+    if (getEpubType() == 0){
         m_document->setLoaded(false);
         m_document->clear();
         m_document->clearCache();
@@ -331,6 +330,33 @@ void Widget::specificPage(int index)
         if (m_document->loaded()){
             currentPage = index;
             scrollPage(currentPage);
+        }
+    }
+}
+
+int Widget::getEpubType()
+{
+    return m_document->getFiletype();
+}
+
+void Widget::managePdfFile()
+{
+    if (!m_document->getpdfLoaded()){
+        if (getEpubType() == 1){
+            m_document->exportPdf();
+            m_document->setpdfLoaded(true);
+            setPdfPath("test.pdf");
+        }else{
+            for (int i=1;i<=m_document->docPage();i++){
+                m_document->setLoaded(false);
+                m_document->clear();
+                m_document->clearCache();
+                m_document->updateDocument(i);
+                m_document->exportOnePagePdf();
+                setPdfPath("test.pdf");
+            }
+            specificPage(1);
+            m_document->setpdfLoaded(true);
         }
     }
 }

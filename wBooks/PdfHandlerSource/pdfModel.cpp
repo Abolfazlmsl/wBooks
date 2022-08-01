@@ -67,6 +67,41 @@ int PdfModel::getNumPages() {
 
 bool PdfModel::getLoaded() const { return loaded; }
 
+QString PdfModel::saveImages(int pageNumber, QString path)
+{
+    float scale = 1.0;
+    QImage result;
+    QSizeF pageSize;
+    QSizeF pageSizePhys;
+    float res = 0;
+    Poppler::Page *page;
+    QSize requestedSize(300,300);
+
+    page = document->page(0);
+
+    pageSize = page->pageSizeF();
+
+    pageSizePhys.setWidth(pageSize.width() / 72);
+
+    res = requestedSize.width() / pageSizePhys.width();
+
+    result = page->renderToImage(scale * res, scale * res);
+
+    QString str = path.replace("\\", "/");
+    QString pageNum = QString::number(pageNumber);
+    QString pageNumstr = pageNum.replace("/", "");
+    QDir dir = str;
+    QString folder = "PdfImages";
+    if(!dir.exists(folder)){
+        dir.mkdir(folder);
+    }
+
+    QString cPath = str+"/" + folder + "/"+pageNumstr+".png";
+    result.save(cPath);
+
+    return cPath;
+}
+
 int PdfModel::loadProvider() {
   DEBUG << "Loading image provider...";
   QQmlEngine *engine = QQmlEngine::contextForObject(this)->engine();

@@ -312,7 +312,7 @@ Window {
             Row{
                 id: mainRow
                 Layout.fillWidth: true
-                Layout.preferredHeight: parent.height * 0.67
+                Layout.preferredHeight: parent.height * 0.7
                 Layout.leftMargin: 10
                 Layout.rightMargin: 10
                 clip: true
@@ -418,7 +418,23 @@ Window {
                                 }
 
                                 onPdfPathChanged: {
-                                    popplerepub.path = pdfPath
+                                    if (epub.getEpubType() === 0){
+                                        popplerepub.path = pdfPath
+                                        for (var i=0; i<popplerepub.numPages;i++){
+                                            var cPath = popplerepub.saveImages(epubModel.count+1, offlineStoragePath)
+                                            epubModel.append({
+                                                             "url": "file:///"+cPath
+                                                             })
+                                        }
+                                    }else{
+                                        popplerepub.path = pdfPath
+                                        epubModel.clear()
+                                        for (var i=0; i<popplerepub.numPages;i++){
+                                            epubModel.append({
+                                                             "url": i
+                                                             })
+                                        }
+                                    }
                                 }
 
                                 MouseArea{
@@ -434,11 +450,16 @@ Window {
 
                             }
 
+                            ListModel{
+                                id: epubModel
+                            }
+
                             ListView{
                                 id: epubview
                                 Layout.fillHeight: true
                                 Layout.preferredWidth: 0
-                                model: popplerepub.numPages
+//                                model: popplerepub.numPages
+                                model: epubModel.count
                                 clip: true
                                 focus: true
                                 ScrollBar.vertical: ScrollBar{}
@@ -448,7 +469,7 @@ Window {
                                     id: image
                                     Image{
                                         width: epubview.width
-                                        source: popplerepub.loaded? "image://poppler/page/" + (index+1): ""
+                                        source: popplerepub.loaded? (epub.getEpubType() === 0) ? epubModel.get(index).url: "image://poppler/page/" + (index+1): ""
                                         sourceSize.width: width
                                         MouseArea{
                                             anchors.fill: parent
@@ -556,11 +577,10 @@ Window {
 
             }
 
-
             RowLayout{
                 id: changepage
                 Layout.fillWidth: true
-                Layout.preferredHeight: parent.height * 0.025
+                Layout.preferredHeight: parent.height * 0.05
                 Layout.topMargin: 4
                 spacing: 50
                 Item{Layout.fillWidth: true}
@@ -628,6 +648,43 @@ Window {
                         }
                     }
                 }
+
+                Item{Layout.fillWidth: true}
+
+                Item{
+                    Layout.fillHeight: true
+                    Layout.preferredWidth: 200
+
+                    Rectangle{
+                        anchors.fill: parent
+                        anchors.topMargin: 5
+                        border.width: 2
+                        border.color: setting.lightMode ? "#888":"black"
+                        radius: 10
+                        color: setting.lightMode ? "#808080":"black"
+                        clip: true
+                        Label{
+                            anchors.fill: parent
+                            text: thisPageNumber + "/" + pagesNumber
+                            anchors.verticalCenter: parent.verticalCenter
+                            anchors.horizontalCenter: parent.horizontalCenter
+
+                            minimumPointSize: 10
+                            fontSizeMode: Text.Fit
+                            font.pixelSize: Qt.application.font.pixelSize * 1.5
+
+                            verticalAlignment: Qt.AlignVCenter
+                            horizontalAlignment: Qt.AlignHCenter
+
+                            color: setting.lightMode ? "black":"white"
+                            clip: true
+                            elide: Text.ElideRight
+                        }
+                    }
+
+
+                }
+
                 Item{Layout.fillWidth: true}
             }
 
@@ -663,55 +720,6 @@ Window {
                         }
                     }
                 }
-            }
-
-            Item{
-                Layout.fillWidth: true
-                Layout.preferredHeight: parent.height * 0.05
-
-                RowLayout{
-                    anchors.fill: parent
-                    spacing: 0
-
-                    Item{
-                        Layout.fillWidth: true
-                        Layout.fillHeight: true
-                    }
-
-                    Rectangle{
-                        Layout.preferredWidth: parent.width * 0.15
-                        Layout.fillHeight: true
-                        Layout.topMargin: 5
-                        border.width: 2
-                        border.color: setting.lightMode ? "#888":"black"
-                        radius: 10
-                        color: setting.lightMode ? "#808080":"black"
-                        clip: true
-                        Label{
-                            anchors.fill: parent
-                            text: thisPageNumber + "/" + pagesNumber
-                            anchors.verticalCenter: parent.verticalCenter
-                            anchors.horizontalCenter: parent.horizontalCenter
-
-                            minimumPointSize: 10
-                            fontSizeMode: Text.Fit
-                            font.pixelSize: Qt.application.font.pixelSize * 1.5
-
-                            verticalAlignment: Qt.AlignVCenter
-                            horizontalAlignment: Qt.AlignHCenter
-
-                            color: setting.lightMode ? "black":"white"
-                            clip: true
-                            elide: Text.ElideRight
-                        }
-                    }
-
-                    Item{
-                        Layout.fillWidth: true
-                        Layout.fillHeight: true
-                    }
-                }
-
             }
 
             RowLayout{
@@ -798,10 +806,11 @@ Window {
                 path = path.replace(/^(file:\/{3})/,"")
                 var fileName = path.slice(path.lastIndexOf("/")+1)
                 browseText.text = fileName
+                epubModel.clear()
                 var result = epub.loadFile(path)
                 if (result){
                     fileUploaded = true
-                    var cPath = epub.copyBooktoDb(offlineStoragePath, fileName)
+                    var cPath = epub.copytoDb(offlineStoragePath, "Files",fileName)
                     setting.cPath = cPath
                     setting.openFileName = fileName
                     mainStack.currentIndex = 1

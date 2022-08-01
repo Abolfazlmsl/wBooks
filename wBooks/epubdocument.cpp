@@ -13,7 +13,10 @@ EPubDocument::EPubDocument(QObject *parent) : QTextDocument(parent),
 //    });
 
     connect(documentLayout(), &QAbstractTextDocumentLayout::pageCountChanged, this, [=](const int &newPage) {
-        if (filetype == epub2 && m_page==1){m_page = newPage;}
+        if (filetype == epub2 && m_page==1){
+            m_page = newPage;
+            emit loadPdfFile();
+        }
         m_newpage = newPage;
         m_loaded = true;
         emit loadCompleted();
@@ -278,9 +281,9 @@ void EPubDocument::loadDocument()
     if (filetype == epub1){
         m_loaded = true;
         emit loadCompleted();
-//        this->setPageSize(size());
-//        this->exportPdf();
+        emit loadPdfFile();
     }
+
 }
 
 void EPubDocument::updateDocument(int page)
@@ -321,6 +324,13 @@ void EPubDocument::updateDocument(int page)
 
     //    emit loadCompleted();
 }
+
+void EPubDocument::exportOnePagePdf()
+{
+    this->setPageSize(size());
+    this->exportPdf();
+}
+
 
 void EPubDocument::exportPdf()
 {

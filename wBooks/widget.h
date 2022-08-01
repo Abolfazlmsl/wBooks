@@ -101,10 +101,12 @@ public slots:
     void resizeEvent();
     int findBlockNumber(int index);
     void setSetting(QString font, int fontSize, bool mode);
-    QString copyBooktoDb(QString path, QString fileName);
+    QString copytoDb(QString path, QString folder, QString fileName);
     void previousPage();
     void nextPage();
     void specificPage(int index);
+    int getEpubType();
+    void managePdfFile();
 
 protected:
     void paint(QPainter *painter) override;

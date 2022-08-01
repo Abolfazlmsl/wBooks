@@ -63,6 +63,7 @@ public:
     void updateDocument(int page);
 
     void clearCache() {m_renderedSvgs.clear();}
+    void exportOnePagePdf();
     void exportPdf();
 
     QVariant getModelData(int index);
@@ -70,6 +71,7 @@ public:
 
 signals:
     void loadCompleted();
+    void loadPdfFile();
     void loadContents(TreeModel *model);
 
 protected:

@@ -6,6 +6,7 @@
 #include <QDebug>
 #include <QQmlContext>
 #include <QQmlEngine>
+#include <QDir>
 
 #define DEBUG                                                                  \
   if (qgetenv("POPPLERPLUGIN_DEBUG") == "1")                                   \
@@ -31,6 +32,9 @@ public:
   QString path;
   int numPages;
   bool loaded;
+
+public slots:
+  QString saveImages(int pageNumber, QString path);
 
 private:
   int loadDocument(QString &pathNAme);
