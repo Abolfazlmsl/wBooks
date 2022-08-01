@@ -626,7 +626,7 @@ Window {
                             verticalAlignment: Qt.AlignVCenter
                             horizontalAlignment: Qt.AlignHCenter
 
-                            color: (setting.lightMode) ?"black":"white"
+                            color: "black"
                             MouseArea{
                                 anchors.fill: parent
                                 cursorShape: Qt.PointingHandCursor
@@ -639,40 +639,7 @@ Window {
                     }
                 }
 
-                Item{
-                    Layout.preferredWidth: 20
-                    Layout.fillHeight: true
-                    Rectangle{
-                        width: 30
-                        height: width
-                        radius: width/2
-                        color: (setting.lightMode) ? (nextPage.enabled) ? "#E9E9E9":"#C2C2C2" : (nextPage.enabled) ? "#C2C2C2":"#E9E9E9"
-                        Label{
-                            id: nextPage
-                            anchors.fill: parent
-                            enabled: (fileUploaded) ? (epubslider.value==pagesNumber)?false:true : false
-                            text: Icons.chevron_right
-                            font.family: webfont.name
-                            font.pixelSize: Qt.application.font.pixelSize * 3
-
-                            verticalAlignment: Qt.AlignVCenter
-                            horizontalAlignment: Qt.AlignHCenter
-
-                            color: (setting.lightMode) ?"black":"white"
-                            MouseArea{
-                                anchors.fill: parent
-                                cursorShape: Qt.PointingHandCursor
-                                onClicked: {
-                                    epubslider.value = epubslider.value + 1
-                                    //                                epub.nextPage()
-                                }
-                            }
-                        }
-                    }
-                }
-
-                Item{Layout.fillWidth: true}
-
+                Item{Layout.preferredWidth: 25}
                 Item{
                     Layout.fillHeight: true
                     Layout.preferredWidth: 200
@@ -703,8 +670,39 @@ Window {
                             elide: Text.ElideRight
                         }
                     }
+                }
 
+                Item{Layout.preferredWidth: 25}
+                Item{
+                    Layout.preferredWidth: 20
+                    Layout.fillHeight: true
+                    Rectangle{
+                        width: 30
+                        height: width
+                        radius: width/2
+                        color: (setting.lightMode) ? (nextPage.enabled) ? "#E9E9E9":"#C2C2C2" : (nextPage.enabled) ? "#C2C2C2":"#E9E9E9"
+                        Label{
+                            id: nextPage
+                            anchors.fill: parent
+                            enabled: (fileUploaded) ? (epubslider.value==pagesNumber)?false:true : false
+                            text: Icons.chevron_right
+                            font.family: webfont.name
+                            font.pixelSize: Qt.application.font.pixelSize * 3
 
+                            verticalAlignment: Qt.AlignVCenter
+                            horizontalAlignment: Qt.AlignHCenter
+
+                            color: "black"
+                            MouseArea{
+                                anchors.fill: parent
+                                cursorShape: Qt.PointingHandCursor
+                                onClicked: {
+                                    epubslider.value = epubslider.value + 1
+                                    //                                epub.nextPage()
+                                }
+                            }
+                        }
+                    }
                 }
 
                 Item{Layout.fillWidth: true}
