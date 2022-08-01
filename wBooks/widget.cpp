@@ -66,6 +66,7 @@ bool Widget::loadFile(const QString &path)
 
     m_path = path;
 
+    m_document->setpdfLoaded(false);
     m_document->setLoaded(false);
     m_document->clear();
     m_document->clearCache();
@@ -212,6 +213,7 @@ void Widget::paint(QPainter *painter)
     if (m_document->getFiletype() == 1 && !m_document->getpdfLoaded()){
         m_document->exportPdf();
         m_document->setpdfLoaded(true);
+        setPdfPath("test.pdf");
     }
 }
 
@@ -242,9 +244,11 @@ void Widget::paint(QPainter *painter)
 
 void Widget::resizeEvent()
 {
+    m_document->setLoaded(false);
     m_document->clearCache();
     m_document->setPageSize(size());
     update();
+    if (m_document->getFiletype() == 0){m_document->setLoaded(true);}
     //    emit m_document->documentLayout()->update(rect);
 }
 
