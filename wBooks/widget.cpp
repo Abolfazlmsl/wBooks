@@ -250,11 +250,10 @@ void Widget::resizeEvent()
     //    emit m_document->documentLayout()->update(rect);
 }
 
-int Widget::findBlockNumber(int index)
+int Widget::findBlockNumber(QModelIndex index)
 {
-    QVariant data = m_document->getModelData(index);
+    QVariant data = m_document->getModelSource(index);
     QString text = data.toString();
-    qDebug() << text;
     QTextCursor text_cursor = m_document->find(text);
     int block_num = text_cursor.blockNumber();
     return block_num;
@@ -337,6 +336,23 @@ void Widget::specificPage(int index)
 int Widget::getEpubType()
 {
     return m_document->getFiletype();
+}
+
+int Widget::getContentPageNumber(QModelIndex index)
+{
+    QStringList paths = m_document->getItemsPath();
+    QVariant data = m_document->getModelSource(index);
+    QString source = data.toString().split("#")[0];
+
+//    qDebug() << source;
+    int result=0;
+    for (int i=0;i<paths.length();i++){
+        bool state = paths[i].contains(source);
+        result = i;
+        if (state) {break;}
+    }
+
+    return result;
 }
 
 void Widget::managePdfFile()

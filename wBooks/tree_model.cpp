@@ -87,6 +87,15 @@ bool TreeModel::setData(const QModelIndex& index, const QVariant& value, int /*r
    return false;
 }
 
+QString TreeModel::source(const QModelIndex &index, int role) const
+{
+    if (!index.isValid() || role != Qt::DisplayRole) {
+       return QString();
+    }
+
+    return internalPointer(index)->source();
+}
+
 void TreeModel::addTopLevelItem(TreeItem* child)
 {
    if(child){

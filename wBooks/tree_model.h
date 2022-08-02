@@ -26,6 +26,7 @@ public:
    QVariant data(const QModelIndex& index, int role = 0) const override;
    bool setData(const QModelIndex& index, const QVariant& value, int role = Qt::EditRole) override;
 
+   QString source(const QModelIndex& index, int role = 0) const;
 public:
    //! Add an item to the top level.
    void addTopLevelItem(TreeItem* child);

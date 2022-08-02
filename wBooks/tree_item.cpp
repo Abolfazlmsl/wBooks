@@ -6,8 +6,8 @@ TreeItem::TreeItem()
 {
 }
 
-TreeItem::TreeItem(const QVariant& data)
-   : _itemData(data),
+TreeItem::TreeItem(const QVariant& data, const QString& src)
+   : _itemData(data), _itemSrc(src),
      _parentItem(nullptr)
 {
 }
@@ -53,7 +53,12 @@ int TreeItem::childCount() const
 
 const QVariant& TreeItem::data() const
 {
-   return _itemData;
+    return _itemData;
+}
+
+const QString &TreeItem::source() const
+{
+    return _itemSrc;
 }
 
 void TreeItem::setData(const QVariant& data)

@@ -39,7 +39,7 @@ void EPubDocument::openDocument(const QString &path)
 
 void EPubDocument::readContents()
 {
-    TreeModel *tModel = new TreeModel();
+//    TreeModel *tModel = new TreeModel();
 
     QString cover = m_container->getStandardPage(EpubPageReference::TableOfContents);
     EpubItem contentItem = m_container->getEpubItem(cover);
@@ -71,10 +71,10 @@ void EPubDocument::readContents()
         QDomNode nodeLabels1 = Labels1.at(i);
         QDomElement ElementLabels1 = nodeLabels1.toElement();
 
-        auto text_content = new TreeItem(readContentText(content_NodeList1, i));
-        tModel_content->addTopLevelItem(text_content);
+//        auto text_content = new TreeItem(readContentText(content_NodeList1, i));
+//        tModel_content->addTopLevelItem(text_content);
 
-        auto text_main = new TreeItem(ElementLabels1.text());
+        auto text_main = new TreeItem(ElementLabels1.text(), readContentText(content_NodeList1, i));
         tModel->addTopLevelItem(text_main);
 
         QDomNode nodePoints1 = Points1.at(i);
@@ -87,10 +87,10 @@ void EPubDocument::readContents()
             QDomNode nodeLabels2 = Labels2.at(j);
             QDomElement ElementLabels2 = nodeLabels2.toElement();
 
-            auto text_content2 = new TreeItem(readContentText(content_NodeList2, j));
-            tModel_content->addItem(text_content, text_content2);
+//            auto text_content2 = new TreeItem(readContentText(content_NodeList2, j));
+//            tModel_content->addItem(text_content, text_content2);
 
-            auto text_main2 = new TreeItem(ElementLabels2.text());
+            auto text_main2 = new TreeItem(ElementLabels2.text(), readContentText(content_NodeList2, j));
             tModel->addItem(text_main, text_main2);
 
             QDomNode nodePoints2 = Points2.at(j-1);
@@ -104,10 +104,10 @@ void EPubDocument::readContents()
                 QDomNode nodeLabels3 = Labels3.at(k);
                 QDomElement ElementLabels3 = nodeLabels3.toElement();
 
-                auto text_content3 = new TreeItem(readContentText(content_NodeList3, k));
-                tModel_content->addItem(text_content2, text_content3);
+//                auto text_content3 = new TreeItem(readContentText(content_NodeList3, k));
+//                tModel_content->addItem(text_content2, text_content3);
 
-                auto text_main3 = new TreeItem(ElementLabels3.text());
+                auto text_main3 = new TreeItem(ElementLabels3.text(), readContentText(content_NodeList3, k));
                 tModel->addItem(text_main2, text_main3);
 
                 QDomNode nodePoints3 = Points3.at(k-1);
@@ -121,10 +121,10 @@ void EPubDocument::readContents()
                     QDomNode nodeLabels4 = Labels4.at(f);
                     QDomElement ElementLabels4 = nodeLabels4.toElement();
 
-                    auto text_content4 = new TreeItem(readContentText(content_NodeList4, f));
-                    tModel_content->addItem(text_content3, text_content4);
+//                    auto text_content4 = new TreeItem(readContentText(content_NodeList4, f));
+//                    tModel_content->addItem(text_content3, text_content4);
 
-                    auto text_main4 = new TreeItem(ElementLabels4.text());
+                    auto text_main4 = new TreeItem(ElementLabels4.text(), readContentText(content_NodeList4, f));
                     tModel->addItem(text_main3, text_main4);
 
                     i++;
@@ -141,10 +141,11 @@ void EPubDocument::readContents()
     emit loadContents(tModel);
 }
 
-QVariant EPubDocument::getModelData(int index)
+QString EPubDocument::getModelSource(QModelIndex index)
 {
-    const QModelIndex &idx = tModel_content->index(index, 0, tModel_content->rootIndex());
-    return tModel_content->data(idx);
+//    const QModelIndex &idx = tModel->index(row, column, tModel_content->rootIndex());
+//    qDebug() << tModel_content->data(index);
+    return tModel->source(index);
 }
 
 QString EPubDocument::readContentText(QDomNodeList list, int counter)
@@ -152,22 +153,23 @@ QString EPubDocument::readContentText(QDomNodeList list, int counter)
     //*******************************Content-Click*************************//
     QDomNode content_node = list.at(counter);
     QDomElement content_element = content_node.toElement();
-    EpubItem toc_Item = m_container->getEpubItem(content_element.attribute("src").split('.')[0]);
-    if (!toc_Item.path.isEmpty()){
-        QSharedPointer<QIODevice> content_ioDevice = m_container->getIoDevice(toc_Item.path);
+    return content_element.attribute("src");
+//    EpubItem toc_Item = m_container->getEpubItem(content_element.attribute("src").split('.')[0]);
+//    if (!toc_Item.path.isEmpty()){
+//        QSharedPointer<QIODevice> content_ioDevice = m_container->getIoDevice(toc_Item.path);
 
-        QDomDocument content_itemDoc;
-        content_itemDoc.setContent(content_ioDevice.data());
-        QDomNodeList content_text = content_itemDoc.elementsByTagName("article");
+//        QDomDocument content_itemDoc;
+//        content_itemDoc.setContent(content_ioDevice.data());
+//        QDomNodeList content_text = content_itemDoc.elementsByTagName("article");
 
-        QDomNode content_itemnode = content_text.at(0);
-        QDomElement content_itemelement = content_itemnode.toElement();
+//        QDomNode content_itemnode = content_text.at(0);
+//        QDomElement content_itemelement = content_itemnode.toElement();
 
 
-        return content_itemelement.text();
-    }else{
-        return "";
-    }
+//        return content_itemelement.text();
+//    }else{
+//        return "";
+//    }
     //***************************************************************//
 }
 
@@ -217,19 +219,22 @@ void EPubDocument::loadDocument()
 
     if (filetype == epub1){
         start = 1;
-        end = 2;
+        end = items.length();
     }else{
         start = 0;
         end = items.length();
     }
 
     int num = 0;
+    itemsPath.clear();
     for (int i=start; i<end;i++){
         const QString &chapter = items[i];
         m_currentItem = m_container->getEpubItem(chapter);
         if (m_currentItem.path.isEmpty()) {
             continue;
         }
+
+        itemsPath.append(m_currentItem.path);
 
         QSharedPointer<QIODevice> ioDevice = m_container->getIoDevice(m_currentItem.path);
 

@@ -99,7 +99,7 @@ public slots:
 //    bool loadFile();
     bool loadFile(const QString &path);
     void resizeEvent();
-    int findBlockNumber(int index);
+    int findBlockNumber(QModelIndex index);
     void setSetting(QString font, int fontSize, bool mode);
     QString copytoDb(QString path, QString folder, QString fileName);
     void previousPage();
@@ -107,6 +107,7 @@ public slots:
     void specificPage(int index);
     int getEpubType();
     void managePdfFile();
+    int getContentPageNumber(QModelIndex index);
 
 protected:
     void paint(QPainter *painter) override;

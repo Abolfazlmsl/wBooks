@@ -12,13 +12,14 @@ public:
    TreeItem();
 
    //! Instance a tree with the input data.
-   explicit TreeItem(const QVariant& data);
+   explicit TreeItem(const QVariant& data, const QString& src);
 
    //! Destroy the item and all its children.
    ~TreeItem();
 
    //! Return the internal data.
    const QVariant& data() const;
+   const QString& source() const;
 
    //! Set the internal data.
    void setData(const QVariant& data);
@@ -46,6 +47,7 @@ private:
 
 private:
    QVariant _itemData;
+   QString _itemSrc;
    TreeItem* _parentItem;
    QVector<TreeItem*> _childItems;
 };

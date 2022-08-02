@@ -56,6 +56,8 @@ public:
     bool getpdfLoaded() { return m_pdfLoaded; }
     void setpdfLoaded(bool isload) {m_pdfLoaded = isload;}
 
+    QStringList getItemsPath() {return itemsPath;}
+
     void openDocument(const QString &path);
     int itemSpacing = 1;
 
@@ -66,7 +68,7 @@ public:
     void exportOnePagePdf();
     void exportPdf();
 
-    QVariant getModelData(int index);
+    QString getModelSource(QModelIndex index);
 
 
 signals:
@@ -98,11 +100,12 @@ private:
     int m_newpage;
     bool m_loaded;
     QStringList items;
+    QStringList itemsPath;
     QString cover;
     FileType filetype = epub1;
     bool m_pdfLoaded = false;
 
-    TreeModel *tModel_content = new TreeModel();
+    TreeModel *tModel = new TreeModel();
 };
 
 #endif // EPUBDOCUMENT_H
