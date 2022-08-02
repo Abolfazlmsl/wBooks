@@ -148,6 +148,13 @@ QString EPubDocument::getModelSource(QModelIndex index)
     return tModel->source(index);
 }
 
+QVariant EPubDocument::getModelData(QModelIndex index)
+{
+//    const QModelIndex &idx = tModel->index(row, column, tModel_content->rootIndex());
+//    qDebug() << tModel_content->data(index);
+    return tModel->data(index);
+}
+
 QString EPubDocument::readContentText(QDomNodeList list, int counter)
 {
     //*******************************Content-Click*************************//
@@ -214,16 +221,16 @@ void EPubDocument::loadDocument()
     QTextBlockFormat pageBreak;
 //    pageBreak.setPageBreakPolicy(QTextFormat::PageBreak_AlwaysBefore);
 
-    int start;
-    int end;
+    int start = 1;
+    int end = items.length();
 
-    if (filetype == epub1){
-        start = 1;
-        end = items.length();
-    }else{
-        start = 0;
-        end = items.length();
-    }
+//    if (filetype == epub1){
+//        start = 1;
+//        end = items.length();
+//    }else{
+//        start = 0;
+//        end = items.length();
+//    }
 
     int num = 0;
     itemsPath.clear();

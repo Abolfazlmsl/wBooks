@@ -340,16 +340,30 @@ int Widget::getEpubType()
 
 int Widget::getContentPageNumber(QModelIndex index)
 {
-    QStringList paths = m_document->getItemsPath();
-    QVariant data = m_document->getModelSource(index);
-    QString source = data.toString().split("#")[0];
-
-//    qDebug() << source;
     int result=0;
-    for (int i=0;i<paths.length();i++){
-        bool state = paths[i].contains(source);
-        result = i;
-        if (state) {break;}
+    if (getEpubType() == 0){
+        QStringList paths = m_document->getItemsPath();
+        QVariant data = m_document->getModelSource(index);
+        QString source = data.toString().split("#")[0];
+
+        //    qDebug() << source;
+        for (int i=0;i<paths.length();i++){
+            bool state = paths[i].contains(source);
+            result = i;
+            if (state) {break;}
+        }
+    }else{
+        QStringList paths = m_document->getItemsPath();
+        QString src = m_document->getModelSource(index);
+        QString data = m_document->getModelData(index).toString();
+        QString source = data.split("#")[0];
+
+        int page = src.split("#").last().split("p").last().toInt();
+
+//        result = m_document->find(m_document->findBlockByNumber(page).text()).position();
+        QTextBlock block = m_document->find(data).block();
+        QTextBlock block2 = m_document->find(data.left(24), block.position()+1).block();
+        result = qCeil(m_document->docPage()*block2.blockNumber()/m_document->blockCount())+1;
     }
 
     return result;

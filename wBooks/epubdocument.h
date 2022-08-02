@@ -69,6 +69,7 @@ public:
     void exportPdf();
 
     QString getModelSource(QModelIndex index);
+    QVariant getModelData(QModelIndex index);
 
 
 signals:
