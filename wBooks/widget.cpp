@@ -353,17 +353,16 @@ int Widget::getContentPageNumber(QModelIndex index)
             if (state) {break;}
         }
     }else{
-        QStringList paths = m_document->getItemsPath();
+        QStringList sources = m_document->getItemsSource();
         QString src = m_document->getModelSource(index);
-        QString data = m_document->getModelData(index).toString();
-        QString source = data.split("#")[0];
+        QString tag = src.split("#").last();
 
-        int page = src.split("#").last().split("p").last().toInt();
+        qsizetype idx = sources.indexOf(tag);
+        QList<int> blockNum = m_document->getContentBlocks();
 
-//        result = m_document->find(m_document->findBlockByNumber(page).text()).position();
-        QTextBlock block = m_document->find(data).block();
-        QTextBlock block2 = m_document->find(data.left(24), block.position()+1).block();
-        result = qCeil(m_document->docPage()*block2.blockNumber()/m_document->blockCount())+1;
+        int pos = m_document->documentLayout()->blockBoundingRect(m_document->findBlockByNumber(blockNum[idx])).y();
+
+        result = qFloor(pos / m_document->pageSize().height())+1;
     }
 
     return result;

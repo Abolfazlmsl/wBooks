@@ -67,6 +67,8 @@ void EPubDocument::readContents()
     QDomNodeList Labels1 = document.elementsByTagName("navLabel");
     QDomNodeList content_NodeList1 = document.elementsByTagName("content");
 
+    tModel->clear();
+    itemsSource.clear();
     for (int i=0; i<Labels1.count(); i++) {
         QDomNode nodeLabels1 = Labels1.at(i);
         QDomElement ElementLabels1 = nodeLabels1.toElement();
@@ -74,6 +76,7 @@ void EPubDocument::readContents()
 //        auto text_content = new TreeItem(readContentText(content_NodeList1, i));
 //        tModel_content->addTopLevelItem(text_content);
 
+        itemsSource.append(readContentText(content_NodeList1, i).split("#").last());
         auto text_main = new TreeItem(ElementLabels1.text(), readContentText(content_NodeList1, i));
         tModel->addTopLevelItem(text_main);
 
@@ -90,6 +93,7 @@ void EPubDocument::readContents()
 //            auto text_content2 = new TreeItem(readContentText(content_NodeList2, j));
 //            tModel_content->addItem(text_content, text_content2);
 
+            itemsSource.append(readContentText(content_NodeList2, j).split("#").last());
             auto text_main2 = new TreeItem(ElementLabels2.text(), readContentText(content_NodeList2, j));
             tModel->addItem(text_main, text_main2);
 
@@ -107,6 +111,7 @@ void EPubDocument::readContents()
 //                auto text_content3 = new TreeItem(readContentText(content_NodeList3, k));
 //                tModel_content->addItem(text_content2, text_content3);
 
+                itemsSource.append(readContentText(content_NodeList3, k).split("#").last());
                 auto text_main3 = new TreeItem(ElementLabels3.text(), readContentText(content_NodeList3, k));
                 tModel->addItem(text_main2, text_main3);
 
@@ -124,6 +129,7 @@ void EPubDocument::readContents()
 //                    auto text_content4 = new TreeItem(readContentText(content_NodeList4, f));
 //                    tModel_content->addItem(text_content3, text_content4);
 
+                    itemsSource.append(readContentText(content_NodeList4, f).split("#").last());
                     auto text_main4 = new TreeItem(ElementLabels4.text(), readContentText(content_NodeList4, f));
                     tModel->addItem(text_main3, text_main4);
 
@@ -213,6 +219,8 @@ void EPubDocument::loadDocument()
         m_page = 1;
     }
 
+    readContents();
+
     QDomDocument domDoc;
     QTextCursor textCursor(this);
     textCursor.beginEditBlock();
@@ -234,6 +242,8 @@ void EPubDocument::loadDocument()
 
     int num = 0;
     itemsPath.clear();
+    contentBlocks.clear();
+    blockInEachIterate = 0;
     for (int i=start; i<end;i++){
         const QString &chapter = items[i];
         m_currentItem = m_container->getEpubItem(chapter);
@@ -246,6 +256,38 @@ void EPubDocument::loadDocument()
         QSharedPointer<QIODevice> ioDevice = m_container->getIoDevice(m_currentItem.path);
 
         domDoc.setContent(ioDevice.data());
+
+        if (filetype == epub2){
+            QDomNodeList Points = domDoc.elementsByTagName("p");
+            for (int j=blockInEachIterate;j<Points.length()+blockInEachIterate;j++){
+                QDomNode nodeLabels = Points.at(j-blockInEachIterate);
+                QDomElement ElementLabels = nodeLabels.toElement();
+                QDomNodeList Points2 = ElementLabels.elementsByTagName("a");
+                QDomNodeList Points3 = ElementLabels.elementsByTagName("b");
+                for (int k=0;k<Points2.length();k++){
+                    QDomNode nodeLabels2 = Points2.at(k);
+                    QDomElement ElementLabels2 = nodeLabels2.toElement();
+                    if (ElementLabels2.attribute("id") != ""){
+                        if (itemsSource.contains(ElementLabels2.attribute("id"))){
+//                            QDomNode nodeLabels3 = Points3.at(k);
+//                            QDomElement ElementLabels3 = nodeLabels3.toElement();
+                            contentBlocks.append(j+1);
+                            qsizetype index = itemsSource.indexOf(ElementLabels2.attribute("id"));
+                            int p_index = j+1;
+                            int counter = index+1;
+                            if (counter < itemsSource.length()){
+                                while (itemsSource[counter] == ElementLabels2.attribute("id")){
+                                    contentBlocks.append(p_index);
+                                    if (counter < itemsSource.length()-1) {counter++;}
+                                    p_index++;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            blockInEachIterate = Points.length();
+        }
 
         if (!cover.isEmpty() && num==0){
             fixImages(domDoc);
@@ -288,7 +330,6 @@ void EPubDocument::loadDocument()
     qDebug() << "Adjust size done in" << timer.elapsed() << "ms";
 
     textCursor.endEditBlock();
-    readContents();
 
     if (filetype == epub1){
         m_loaded = true;

@@ -57,6 +57,7 @@ public:
     void setpdfLoaded(bool isload) {m_pdfLoaded = isload;}
 
     QStringList getItemsPath() {return itemsPath;}
+    QStringList getItemsSource() {return itemsSource;}
 
     void openDocument(const QString &path);
     int itemSpacing = 1;
@@ -70,6 +71,7 @@ public:
 
     QString getModelSource(QModelIndex index);
     QVariant getModelData(QModelIndex index);
+    QList<int> getContentBlocks() {return contentBlocks;}
 
 
 signals:
@@ -102,6 +104,9 @@ private:
     bool m_loaded;
     QStringList items;
     QStringList itemsPath;
+    QStringList itemsSource;
+    QList<int> contentBlocks;
+    int blockInEachIterate = 0;
     QString cover;
     FileType filetype = epub1;
     bool m_pdfLoaded = false;
